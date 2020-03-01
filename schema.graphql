@@ -1,0 +1,41 @@
+type Timelock @entity {
+  id: ID!
+  platform: Platform!
+  tx: [Tx]! @derivedFrom(field: "timelock")
+}
+
+type Platform @entity {
+  id: ID!
+  target: [Target]! @derivedFrom(field: "platform")
+  timelock: [Timelock]! @derivedFrom(field: "platform")
+}
+
+type Tx @entity {
+  id: ID!            # Uses signature because transaction hash will not be the same across events
+  eta: BigInt!
+  createdAtTimestamp: BigInt!
+  createdAtTransaction: String!
+  value: BigInt!
+  signature: String!               # Ideally decoded from matching keccack hash
+  data: String!                    # Prepend with 0x
+  target: Target!
+  timelock: Timelock!
+  isCancelled: Boolean!
+  isExecuted: Boolean!
+  cancelledAtTimestamp: BigInt     # Optional
+  cancelledAtTransaction: String   # Optional
+  executedAtTimestamp: BigInt      # Optional
+  executedAtTransaction: String    # Optional
+}
+
+type Target @entity {
+  id: ID!
+  platform: Platform!
+  param: [Param]! @derivedFrom(field: "target")
+  tx: [Tx]! @derivedFrom(field: "target")
+}
+
+type Param @entity {
+  id: ID!
+  target: Target!
+}

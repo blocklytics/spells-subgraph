@@ -1,0 +1,208 @@
+specVersion: 0.0.2
+description: Spells
+# repository: https://github.com/blocklytics/spells-subgraph
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Maker_DSChief
+    network: mainnet
+    source:
+      address: '0x9ef05f7f6deb616fd37ac3c959a2ddd25a54e4f5'
+      abi: DSChief
+      startBlock: 7705361
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Tx
+        - Timelock
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: DSChief
+          file: ./abis/Maker/DSChief.json
+        - name: DSSpell
+          file: ./abis/Maker/DSSpell.json
+      eventHandlers:
+        - event: Etch(indexed bytes32)
+          handler: handleEtch
+        - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,uint256,bytes)
+          handler: handleLogNote
+        - event: LogSetAuthority(indexed address)
+          handler: handleLogSetAuthority
+        - event: LogSetOwner(indexed address)
+          handler: handleLogSetOwner
+      file: ./src/mappings/Maker/DSChief.ts
+  - kind: ethereum/contract
+    name: Maker_DSPause
+    network: mainnet
+    source:
+      address: '0xbe286431454714f511008713973d3b053a2d38f3'
+      abi: DSPause
+      startBlock: 8928171
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Tx
+        - Timelock
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: DSPause
+          file: ./abis/Maker/DSPause.json
+      eventHandlers:
+        - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,uint256,bytes)
+          handler: handleLogNote
+        - event: LogSetAuthority(indexed address)
+          handler: handleLogSetAuthority
+        - event: LogSetOwner(indexed address)
+          handler: handleLogSetOwner
+      file: ./src/mappings/Maker/DSPause.ts
+  - kind: ethereum/contract
+    name: Compound_Timelock
+    network: mainnet
+    source:
+      address: '0x6d903f6003cca6255d85cca4d3b5e5146dc33925'
+      abi: Timelock
+      startBlock: 8722895
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Timelock
+        - Tx
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: Timelock
+          file: ./abis/Compound/Timelock.json
+      eventHandlers:
+        - event: CancelTransaction(indexed bytes32,indexed address,uint256,string,bytes,uint256)
+          handler: handleCancelTransaction
+        - event: ExecuteTransaction(indexed bytes32,indexed address,uint256,string,bytes,uint256)
+          handler: handleExecuteTransaction
+        - event: NewAdmin(indexed address)
+          handler: handleNewAdmin
+        - event: NewDelay(indexed uint256)
+          handler: handleNewDelay
+        - event: NewPendingAdmin(indexed address)
+          handler: handleNewPendingAdmin
+        - event: QueueTransaction(indexed bytes32,indexed address,uint256,string,bytes,uint256)
+          handler: handleQueueTransaction
+      file: ./src/mappings/Compound/Timelock.ts
+  - kind: ethereum/contract
+    name: DDEX_Timelock
+    network: mainnet
+    source:
+      address: '0xb15367df8a39ea06f8f81ed35d49e056ee05f3b7'
+      abi: Timelock
+      startBlock: 6919699
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Timelock
+        - Tx
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: Timelock
+          file: ./abis/DDEX/Timelock.json
+      eventHandlers:
+        - event: Confirmation(indexed address,indexed uint256)
+          handler: handleConfirmation
+        - event: Deposit(indexed address,uint256)
+          handler: handleDeposit
+        - event: Execution(indexed uint256)
+          handler: handleExecution
+        - event: ExecutionFailure(indexed uint256)
+          handler: handleExecutionFailure
+        - event: LockSecondsChange(uint256)
+          handler: handleLockSecondsChange
+        - event: OwnerAddition(indexed address)
+          handler: handleOwnerAddition
+        - event: OwnerRemoval(indexed address)
+          handler: handleOwnerRemoval
+        - event: RequirementChange(uint256)
+          handler: handleRequirementChange
+        - event: Revocation(indexed address,indexed uint256)
+          handler: handleRevocation
+        - event: Submission(indexed uint256)
+          handler: handleSubmission
+        - event: UnlockTimeSet(indexed uint256,uint256)
+          handler: handleUnlockTimeSet
+      file: ./src/mappings/DDEX/Timelock.ts
+  - kind: ethereum/contract
+    name: Curve_CurveY
+    network: mainnet
+    source:
+      address: '0x45F783CCE6B7FF23B2ab2D70e416cdb7D6055f51'
+      abi: CurveY
+      startBlock: 9476468
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Timelock
+        - Tx
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: CurveY
+          file: ./abis/Curve/CurveY.json
+      eventHandlers:
+        - event: CommitNewAdmin(indexed uint256,indexed address)
+          handler: handleCommitNewAdmin
+        - event: NewAdmin(indexed address)
+          handler: handleNewAdmin
+        - event: CommitNewParameters(indexed uint256,uint256,uint256,uint256)
+          handler: handleCommitNewParameters
+        - event: NewParameters(uint256,uint256,uint256)
+          handler: handleNewParameters
+      file: ./src/mappings/Curve/CurveY.ts
+  - kind: ethereum/contract
+    name: Dharma_Timelocker
+    network: mainnet
+    source:
+      address: '0x00000000008a10a98969a000d1c0aba90f858d6a'
+      abi: Timelocker
+      startBlock: 8928508
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Timelock
+        - Tx
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: Timelocker
+          file: ./abis/Dharma/Timelocker.json
+      eventHandlers:
+        - event: AdharmaContingencyActivated()
+          handler: handleAdharmaContingencyActivated
+        - event: AdharmaContingencyExited()
+          handler: handleAdharmaContingencyExited
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: TimelockExpirationModified(bytes4,uint256,uint256)
+          handler: handleTimelockExpirationModified
+        - event: TimelockInitiated(bytes4,uint256,bytes,uint256)
+          handler: handleTimelockInitiated
+        - event: TimelockIntervalModified(bytes4,uint256,uint256)
+          handler: handleTimelockIntervalModified
+      file: ./src/mappings/Dharma/Timelocker.ts
