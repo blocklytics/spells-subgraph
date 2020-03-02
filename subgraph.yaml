@@ -1,6 +1,6 @@
 specVersion: 0.0.2
 description: Spells
-# repository: https://github.com/blocklytics/spells-subgraph
+repository: https://github.com/blocklytics/spells-subgraph
 schema:
   file: ./schema.graphql
 dataSources:

@@ -42,24 +42,24 @@ export function createTxIfValid(event: Etch): void {
                 // log.warning("slateAddress reverted", [])
             } else {
                 let sig = sigResult.value.toHexString()
-                let eta = etaResult.value.toHexString()
+                let eta = etaResult.value
                 let tag = tagResult.value.toHexString()
-                log.debug("slateAddress result {} {} {} slate {}", [sig, eta, tag, id])
+                log.debug("slateAddress result {} {} {} slate {}", [sig, eta.toHexString(), tag, id])
+                createTarget(event.address) // TODO check assumption that this is DSChief
+
+                tx.eta = eta
+                tx.createdAtTimestamp = event.block.timestamp
+                tx.createdAtTransaction = event.transaction.hash.toHexString()
+                tx.value = BigInt.fromI32(0) // TODO check assumption that value is not available
+                tx.signature = sig // TODO check assumption that sig = function signature
+                tx.data = tag // TODO check assumption that tag = data
+                tx.target = event.address.toHexString()   // TODO see above
+                tx.timelock = event.address.toHexString() // Should match id in createTimelock function
+                tx.isCancelled = false
+                tx.isExecuted = false
+                tx.save()
             }
         }
-
-
-        // tx.eta = event.params.eta
-        // tx.createdAtTimestamp = event.block.timestamp
-        // tx.createdAtTransaction = event.transaction.hash.toHexString()
-        // tx.value = event.params.value
-        // tx.signature = event.params.signature
-        // tx.data = event.params.data.toHexString()
-        // tx.target = event.params.target.toHexString()
-        // tx.timelock = event.address.toHexString() // Should match id in createTimelock function
-        // tx.isCancelled = false
-        // tx.isExecuted = false
-        // tx.save()
     }
 }
 

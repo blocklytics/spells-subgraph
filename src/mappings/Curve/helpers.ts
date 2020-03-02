@@ -10,6 +10,7 @@ export function createAndReturnTx(event: CommitNewParameters): Tx {
     if (tx === null) {
         tx = new Tx(id)
         createTimelock(event.address)
+        createTarget(event.address)
 
         tx.createdAtTimestamp = event.block.timestamp
         tx.createdAtTransaction = event.transaction.hash.toHexString()

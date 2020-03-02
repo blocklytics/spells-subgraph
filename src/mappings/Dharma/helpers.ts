@@ -12,11 +12,7 @@ export function createAndReturnTx(event: TimelockInitiated): Tx {
     if (tx === null) {
         tx = new Tx(id)
         createTimelock(event.address)
-
-        // let timelockContract = TimelockerContract.bind(event.address)
-        // let spell = timelockContract.transactions(event.params.transactionId)
-        // let targetAddress = spell.value0
-        // createTarget(targetAddress)
+        createTarget(new Address(0x0)) // TODO this should be the beacon
 
         tx.eta = event.params.timeComplete
         tx.createdAtTimestamp = event.block.timestamp
@@ -24,7 +20,7 @@ export function createAndReturnTx(event: TimelockInitiated): Tx {
         tx.value = BigInt.fromI32(0)
         tx.signature = event.params.functionSelector.toHexString()
         tx.data = event.params.arguments.toHexString()
-        tx.target = '0x0' // TODO
+        tx.target = '0x0' // TODO, see above
         tx.timelock = event.address.toHexString() // Should match id in createTimelock function
         tx.isCancelled = false
         tx.isExecuted = false

@@ -13,13 +13,13 @@ export function createAndReturnTx(event: QueueTransaction): Tx {
 
         createTimelock(event.address)
         // createPlatform()
+        createTarget(event.params.target)
 
         tx.eta = event.params.eta
         tx.createdAtTimestamp = event.block.timestamp
         tx.createdAtTransaction = event.transaction.hash.toHexString()
         tx.value = event.params.value
         tx.signature = event.params.signature
-        // tx.platform = PLATFORM
         tx.data = event.params.data.toHexString()
         tx.target = event.params.target.toHexString()
         log.debug("Compound target {}", [tx.target])
