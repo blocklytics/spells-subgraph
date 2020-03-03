@@ -11,7 +11,7 @@ type Platform @entity {
 }
 
 type Tx @entity {
-  id: ID!            # Uses signature because transaction hash will not be the same across events
+  id: ID!            # Uses various unique representations (do not use tx hash; it will not be the same across lifecycle events)
   eta: BigInt!
   createdAtTimestamp: BigInt!
   createdAtTransaction: String!
