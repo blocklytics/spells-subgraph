@@ -1,66 +1,66 @@
-import { Address, log } from "@graphprotocol/graph-ts"
+import { BigInt } from "@graphprotocol/graph-ts"
 import { QueueTransaction } from '../../../generated/Compound_Timelock/Timelock'
-import { Platform, Target, Timelock, Tx } from '../../../generated/schema'
+import { Spell } from '../../../generated/schema'
+import { createPlatform, createTimelock, createTarget } from "../helpers"
 
 const PLATFORM = "Compound"
 
-export function createAndReturnTx(event: QueueTransaction): Tx {
-    let id = event.params.txHash.toHexString() // Signature of the spell - this is not a transaction hash!
-    let tx = Tx.load(id)
+/** Returns 4-byte signature (keccak hash) from human-readable function name
+ * 
+ * @dev These functions come from the Compound target contracts with `Admin Functions` specified.
+ * @param functionName Human-readable function name
+ * @returns 4-byte signature (or input if no result found)
+ */
+function signatureForName(functionName: string): string {
+    if (functionName == "_setReserveFactor(uint256)") return "0xfca7820b"
+    else if (functionName == "_setInterestRateModel(address)") return "0xf2b3abbd"
+    else if (functionName == "_setCollateralFactor(address,uint256)") return "0xe4028eee"
+    else if (functionName == "transfer(address,uint256)") return "0xa9059cbb"
+    else if (functionName == "_reduceReserves(uint256)") return "0x601a0bf1"
+    else if (functionName == "_setImplementation(address,bool,bytes)") return "0x555bcc40"
+    else if (functionName == "_supportMarket(address)") return "0xa76b3fda"
+    else if (functionName == "_setPriceOracle(address)") return "0x55ee1fe1"
+    else if (functionName == "_setComptroller(address)") return "0x4576b5db"
+    else if (functionName == "_setPendingAdmin(address)") return "0xb71d1a0c"
+    else if (functionName == "_acceptAdmin()") return "0xe9c714f2"
+    else return functionName
+}
+
+/** Convenience function for creating Compound Platform
+ * 
+ * @dev TODO - update `currentAdmin`
+ */
+function createPlatformForCompound(): void {
+    createPlatform(PLATFORM, true, true)
+}
+
+export function createAndReturnSpell(event: QueueTransaction): Spell {
+    let id = event.params.txHash.toHexString() // Signature of the spell (not the transaction hash!)
+    let tx = Spell.load(id)
     if (tx === null) {
-        log.debug("(QueueTransaction) Tx created: {}", [id])
-        tx = new Tx(id)
+        createPlatformForCompound() // Ensure platform is created
 
-        createTimelock(event.address)
-        // createPlatform()
-        createTarget(event.params.target)
+        let timelockAddress = event.address
+        createTimelock(timelockAddress, PLATFORM) // Ensure timelock is created
 
+        let targetAddress = event.params.target
+        createTarget(targetAddress, PLATFORM) // Ensure target is created
+
+        tx = new Spell(id)
         tx.eta = event.params.eta
         tx.createdAtTimestamp = event.block.timestamp
         tx.createdAtTransaction = event.transaction.hash.toHexString()
+        tx.expiresAtTimestamp = BigInt.fromI32(0)
         tx.value = event.params.value
-        tx.signature = event.params.signature
+        tx.functionName = event.params.signature
+        tx.signature = signatureForName(tx.functionName)
         tx.data = event.params.data.toHexString()
-        tx.target = event.params.target.toHexString()
-        log.debug("Compound target {}", [tx.target])
-        tx.timelock = event.address.toHexString() // Should match id in createTimelock function
+        tx.platform = PLATFORM
+        tx.target = targetAddress.toHexString()
+        tx.timelock = timelockAddress.toHexString()
         tx.isCancelled = false
         tx.isExecuted = false
         tx.save()
     }
-    return tx as Tx
-}
-
-export function createTimelock(address: Address): void {
-    log.debug("Compound createTimelock", [])
-    createPlatform()
-    let id = address.toHexString()
-    let timelock = Timelock.load(id)
-    if (timelock === null) {
-        timelock = new Timelock(id)
-        timelock.platform = PLATFORM
-        timelock.save()
-    }
-}
-
-export function createTarget(address: Address): void {
-    log.debug("Compound createTarget", [])
-    createPlatform()
-    let id = address.toHexString()
-    let target = Target.load(id)
-    if (target === null) {
-        target = new Target(id)
-        target.platform = PLATFORM
-        target.save()
-    }
-}
-
-export function createPlatform(): void {
-    log.debug("Compound createPlatform", [])
-    let id = PLATFORM
-    let platform = Platform.load(id)
-    if (platform === null) {
-        platform = new Platform(id)
-        platform.save()
-    }    
+    return tx as Spell
 }

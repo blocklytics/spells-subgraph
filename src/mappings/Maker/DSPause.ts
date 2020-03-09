@@ -1,39 +1,71 @@
-import { Address, log } from "@graphprotocol/graph-ts"
+import { log } from "@graphprotocol/graph-ts"
 import { LogNote, LogSetAuthority, LogSetOwner } from '../../../generated/Maker_DSPause/DSPause'
-import { Tx, Timelock } from '../../../generated/schema'
+import { Spell } from '../../../generated/schema'
+import { updateSpellFromLogNote } from './helpers'
 
-export function handleLogNote(event: LogNote): void {
-    let id = event.params.sig.toHexString() // Sig
-    log.debug("DSPause handleLogNote in tx {}", [id])
-    let tx = Tx.load(id)
-    if (tx !== null) {
-        log.debug("(handleLogNote) id is not null {}", [id])
-        tx = new Tx(id)
+/** Handles anonymous event for `setDelay(address)`
+ * 
+ * @dev TODO - See See https://github.com/blocklytics/spells-subgraph/issues/5
+ */
+export function handleLogNoteSetDelay(event: LogNote): void {
+    let debug_id = event.transaction.hash.toHexString()
+    let bar = event.params.bar.toHexString() // ??
+    let fax = event.params.fax.toHexString() // ??
+    let foo = "0x".concat(event.params.foo.toHexString().slice(26)) // ??
+    let guy = event.params.guy.toHexString() // Spell contract address
+    let sig = event.params.sig.toHexString() // Signature // Lift = 0x3c278bd5
+    let wad = event.params.wad.toString()    // Value
 
-        createTimelock(event.address)
-        tx.eta = event.params.wad
-        tx.createdAtTimestamp = event.block.timestamp
-        tx.createdAtTransaction = event.transaction.hash.toHexString()
-        tx.signature = event.params.foo.toHexString()
-        tx.data = event.params.bar.toHexString()
-        tx.target = event.params.guy.toHexString()
-        tx.timelock = event.address.toHexString() // Should match id in createTimelock function
-        tx.isCancelled = false
-        tx.isExecuted = false
-        tx.save()
+    log.debug("DSPause setDelay for spell {} in tx {}", [guy, debug_id])
+
+    let tx = Spell.load(guy)
+    if (tx === null) {
+        log.debug("DSPause setDelay. Spell is null in tx {}. {} {} {} {} {} {}", [debug_id, bar, fax, foo, guy, sig, wad])
+        // TODO - check assumption that only etched spells can be lifted?
+    } else {
+        log.debug("DSPause setDelay. Spell found in tx {}. {} {} {} {} {} {}", [debug_id, bar, fax, foo, guy, sig, wad])
+        // TODO - check that spells are being found
     }
 }
 
-export function handleLogSetAuthority(event: LogSetAuthority): void {}
+/** Handles anonymous event for `plot(address usr, bytes32 tag, bytes memory fax, uint eta)`
+ * 
+ * @dev This event schedules a spell
+ */
+export function handleLogNotePlot(event: LogNote): void {
+    updateSpellFromLogNote(event)
+}
 
-export function handleLogSetOwner(event: LogSetOwner): void {}
+/** Handles anonymous event for `drop(address usr, bytes32 tag, bytes memory fax, uint eta)`
+ * 
+ * @dev This event cancels a spell
+ */
+export function handleLogNoteDrop(event: LogNote): void {
+    updateSpellFromLogNote(event)
+}
 
-function createTimelock(address: Address): void {
-    let id = address.toHexString()
-    let timelock = Timelock.load(id)
-    if (timelock === null) {
-        timelock = new Timelock(id)
-        timelock.platform = "Maker"
-        timelock.save()
-    }
+/** Handles anonymous event for `exec(address usr, bytes32 tag, bytes memory fax, uint eta)`
+ * 
+ * @dev This event executes a spell
+ */
+export function handleLogNoteExec(event: LogNote): void {
+    updateSpellFromLogNote(event)
+}
+
+/** Handles event LogSetAuthority
+ * 
+ * @dev TODO - See https://github.com/blocklytics/spells-subgraph/issues/14
+ */
+export function handleLogSetAuthority(event: LogSetAuthority): void {
+    let debug_id = event.transaction.hash.toHexString()
+    log.warning("DSPause handleLogSetAuthority not handled in tx {}", [debug_id])
+}
+
+/** Handles event LogSetOwner
+ * 
+ * @dev TODO - See https://github.com/blocklytics/spells-subgraph/issues/14
+ */
+export function handleLogSetOwner(event: LogSetOwner): void {
+    let debug_id = event.transaction.hash.toHexString()
+    log.warning("DSPause handleLogSetOwner not handled in tx {}", [debug_id])
 }

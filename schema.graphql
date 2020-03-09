@@ -1,25 +1,34 @@
 type Timelock @entity {
   id: ID!
   platform: Platform!
-  tx: [Tx]! @derivedFrom(field: "timelock")
+  currentAdmin: String # Optional
+  spells: [Spell]! @derivedFrom(field: "timelock")
 }
 
 type Platform @entity {
   id: ID!
-  target: [Target]! @derivedFrom(field: "platform")
-  timelock: [Timelock]! @derivedFrom(field: "platform")
+  currentAdmin: String # Optional
+  usesAdmin: Boolean!
+  usesTimelock: Boolean!
+  spells: [Spell]! @derivedFrom(field: "platform")
+  targets: [Target]! @derivedFrom(field: "platform")
+  timelocks: [Timelock]! @derivedFrom(field: "platform")
 }
 
-type Tx @entity {
+type Spell @entity {
   id: ID!            # Uses various unique representations (do not use tx hash; it will not be the same across lifecycle events)
-  eta: BigInt!
+  description: String              # Optional
+  eta: BigInt!                     # Set to 0 if not applicable
   createdAtTimestamp: BigInt!
   createdAtTransaction: String!
+  expiresAtTimestamp: BigInt!      # Set to 0 if not applicable
   value: BigInt!
-  signature: String!               # Ideally decoded from matching keccack hash
+  functionName: String!            # Human-readable function name
+  signature: String!               # Function signature (keccak hash)
   data: String!                    # Prepend with 0x
   target: Target!
   timelock: Timelock!
+  platform: Platform!
   isCancelled: Boolean!
   isExecuted: Boolean!
   cancelledAtTimestamp: BigInt     # Optional
@@ -30,9 +39,10 @@ type Tx @entity {
 
 type Target @entity {
   id: ID!
+  name: String!
   platform: Platform!
-  param: [Param]! @derivedFrom(field: "target")
-  tx: [Tx]! @derivedFrom(field: "target")
+  params: [Param]! @derivedFrom(field: "target")
+  spells: [Spell]! @derivedFrom(field: "target")
 }
 
 type Param @entity {

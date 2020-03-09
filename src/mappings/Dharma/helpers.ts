@@ -1,62 +1,78 @@
 import { Address, BigInt, log } from "@graphprotocol/graph-ts"
-import { Timelocker as TimelockerContract, TimelockInitiated } from '../../../generated/Dharma_Timelocker/Timelocker'
-import { Platform, Target, Timelock, Tx } from '../../../generated/schema'
+import { TimelockInitiated } from '../../../generated/Dharma_Timelocker/Timelocker'
+import { Spell } from '../../../generated/schema'
+import { createPlatform, createTimelock, createTarget } from '../helpers'
 
-const PLATFORM = "Dharma"
+export const PLATFORM = "Dharma"
 
-export function createAndReturnTx(event: TimelockInitiated): Tx {
-    // TODO get old tx and invalidate
-    
+/** Returns human-readable function name from 4-byte signature
+ * 
+ * @dev These functions come from the Dharma contract comments.
+ * @param signature 4-byte signature (keccak hash)
+ * @returns result (or input if no result found)
+ */
+function nameForSignature(signature: string): string {
+    if (signature == "0xf000999e") return "upgrade(address,address,address)"
+    else if (signature == "0x3e12b2ed") return "transferControllerOwnership(address,address)"
+    else if (signature == "0xe950c085") return "modifyTimelockInterval(bytes4,uint256)"
+    else if (signature == "0xd7ce3c6f") return "modifyTimelockExpiration(bytes4,uint256)"
+    else return signature
+}
+
+/** Convenience function for creating DDEX Platform
+ * 
+ * @dev The `currentAdmin` is hardcoded based on deployment parameters of the Timelocker
+ * @dev TODO - update `currentAdmin` for ownership transfers
+ */
+function createPlatformForDharma(): void {
+    createPlatform(PLATFORM, true, true, "0x00000001008b2ff2004f00a7c8a0f48c675e5034")
+}
+
+/** Creates and returns a Spell from the Timelocker TimelockInitiated event.
+ * 
+ * @dev If the spell already exists, it is returned. If the spell does not exist, it is created then returned.
+ * @param event Timelocker TimelockInitiated
+ * @returns Spell
+ */
+export function createAndReturnSpell(event: TimelockInitiated): Spell {
     let id = PLATFORM + "-" + event.params.arguments.toHexString() // Contract uses hashed value of args
-    let tx = Tx.load(id)
+    let tx = Spell.load(id)
     if (tx === null) {
-        tx = new Tx(id)
-        createTimelock(event.address)
-        let targetAddress = event.address // TODO this should be the beacon 
-        createTarget(targetAddress) // TODO see above
+        createPlatformForDharma() // Ensure platform is created
 
+        let timelockAddress = event.address
+        createTimelock(timelockAddress, PLATFORM) // Ensure timelock is created
+
+        let targetAddress = Address.fromHexString("0x".concat(event.params.arguments.toHexString().slice(26,66))) as Address // UpgradeBeaconController
+        createTarget(targetAddress, PLATFORM) // Ensure target is created
+
+        // log.debug("Dharma new tx args: {} {} {} in tx {}", [
+        //     "0x".concat(event.params.arguments.toHexString().slice(26,66)),   // UpgradeBeaconController
+        //     // Note: the UpgradeBeaconController will emit an Upgrade event with new implementation
+        //     // TODO - See https://github.com/blocklytics/spells-subgraph/issues/12
+        //     //      - Create a template for UpgradeBeaconControllers
+        //     //      - List for Upgrade events to check when a Spell is executed
+        //     "0x".concat(event.params.arguments.toHexString().slice(80,120)),  // UpgradeBeacon
+        //     "0x".concat(event.params.arguments.toHexString().slice(144,184)), // Implementation
+        //     event.transaction.hash.toHexString()
+        // ])
+
+        tx = new Spell(id)
+        tx.description = "Upgrade"
         tx.eta = event.params.timeComplete
         tx.createdAtTimestamp = event.block.timestamp
         tx.createdAtTransaction = event.transaction.hash.toHexString()
+        tx.expiresAtTimestamp = event.params.timeExpired
         tx.value = BigInt.fromI32(0)
         tx.signature = event.params.functionSelector.toHexString()
+        tx.functionName = nameForSignature(tx.signature)
         tx.data = event.params.arguments.toHexString()
-        tx.target = targetAddress.toHexString() // TODO see above
-        tx.timelock = event.address.toHexString() // Should match id in createTimelock function
+        tx.platform = PLATFORM
+        tx.target = targetAddress.toHexString()
+        tx.timelock = timelockAddress.toHexString()
         tx.isCancelled = false
         tx.isExecuted = false
         tx.save()
      }
-     return tx as Tx
-}
-
-export function createTimelock(address: Address): void {
-    createPlatform()
-    let id = address.toHexString()
-    let timelock = Timelock.load(id)
-    if (timelock === null) {
-        timelock = new Timelock(id)
-        timelock.platform = PLATFORM
-        timelock.save()
-    }
-}
-
-export function createTarget(address: Address): void {
-    createPlatform()
-    let id = address.toHexString()
-    let target = Target.load(id)
-    if (target === null) {
-        target = new Target(id)
-        target.platform = PLATFORM
-        target.save()
-    }
-}
-
-export function createPlatform(): void {
-    let id = PLATFORM
-    let platform = Platform.load(id)
-    if (platform === null) {
-        platform = new Platform(id)
-        platform.save()
-    }    
+     return tx as Spell
 }

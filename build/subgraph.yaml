@@ -16,7 +16,7 @@ dataSources:
       apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
-        - Tx
+        - Spell
         - Timelock
         - Platform
         - Target
@@ -31,7 +31,8 @@ dataSources:
           handler: handleEtch
         - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed
             bytes32,uint256,bytes)
-          handler: handleLogNote
+          topic0: "0x3c278bd500000000000000000000000000000000000000000000000000000000"
+          handler: handleLogNoteLift
         - event: LogSetAuthority(indexed address)
           handler: handleLogSetAuthority
         - event: LogSetOwner(indexed address)
@@ -49,7 +50,7 @@ dataSources:
       apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
-        - Tx
+        - Spell
         - Timelock
         - Platform
         - Target
@@ -57,10 +58,25 @@ dataSources:
       abis:
         - name: DSPause
           file: Maker_DSPause/abis/Maker/DSPause.json
+        - name: DSSpell
+          file: Maker_DSPause/abis/Maker/DSSpell.json
       eventHandlers:
         - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed
             bytes32,uint256,bytes)
-          handler: handleLogNote
+          topic0: "0xe177246e00000000000000000000000000000000000000000000000000000000"
+          handler: handleLogNoteSetDelay
+        - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed
+            bytes32,uint256,bytes)
+          topic0: "0x46d2fbbb00000000000000000000000000000000000000000000000000000000"
+          handler: handleLogNotePlot
+        - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed
+            bytes32,uint256,bytes)
+          topic0: "0x162c7de300000000000000000000000000000000000000000000000000000000"
+          handler: handleLogNoteDrop
+        - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed
+            bytes32,uint256,bytes)
+          topic0: "0x168ccd6700000000000000000000000000000000000000000000000000000000"
+          handler: handleLogNoteExec
         - event: LogSetAuthority(indexed address)
           handler: handleLogSetAuthority
         - event: LogSetOwner(indexed address)
@@ -79,7 +95,7 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - Timelock
-        - Tx
+        - Spell
         - Platform
         - Target
         - Param
@@ -114,7 +130,7 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - Timelock
-        - Tx
+        - Spell
         - Platform
         - Target
         - Param
@@ -158,7 +174,7 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - Timelock
-        - Tx
+        - Spell
         - Platform
         - Target
         - Param
@@ -188,7 +204,7 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - Timelock
-        - Tx
+        - Spell
         - Platform
         - Target
         - Param

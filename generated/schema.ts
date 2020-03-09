@@ -51,13 +51,30 @@ export class Timelock extends Entity {
     this.set("platform", Value.fromString(value));
   }
 
-  get tx(): Array<string | null> {
-    let value = this.get("tx");
+  get currentAdmin(): string | null {
+    let value = this.get("currentAdmin");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set currentAdmin(value: string | null) {
+    if (value === null) {
+      this.unset("currentAdmin");
+    } else {
+      this.set("currentAdmin", Value.fromString(value as string));
+    }
+  }
+
+  get spells(): Array<string | null> {
+    let value = this.get("spells");
     return value.toStringArray();
   }
 
-  set tx(value: Array<string | null>) {
-    this.set("tx", Value.fromStringArray(value));
+  set spells(value: Array<string | null>) {
+    this.set("spells", Value.fromStringArray(value));
   }
 }
 
@@ -91,26 +108,70 @@ export class Platform extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get target(): Array<string | null> {
-    let value = this.get("target");
+  get currentAdmin(): string | null {
+    let value = this.get("currentAdmin");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set currentAdmin(value: string | null) {
+    if (value === null) {
+      this.unset("currentAdmin");
+    } else {
+      this.set("currentAdmin", Value.fromString(value as string));
+    }
+  }
+
+  get usesAdmin(): boolean {
+    let value = this.get("usesAdmin");
+    return value.toBoolean();
+  }
+
+  set usesAdmin(value: boolean) {
+    this.set("usesAdmin", Value.fromBoolean(value));
+  }
+
+  get usesTimelock(): boolean {
+    let value = this.get("usesTimelock");
+    return value.toBoolean();
+  }
+
+  set usesTimelock(value: boolean) {
+    this.set("usesTimelock", Value.fromBoolean(value));
+  }
+
+  get spells(): Array<string | null> {
+    let value = this.get("spells");
     return value.toStringArray();
   }
 
-  set target(value: Array<string | null>) {
-    this.set("target", Value.fromStringArray(value));
+  set spells(value: Array<string | null>) {
+    this.set("spells", Value.fromStringArray(value));
   }
 
-  get timelock(): Array<string | null> {
-    let value = this.get("timelock");
+  get targets(): Array<string | null> {
+    let value = this.get("targets");
     return value.toStringArray();
   }
 
-  set timelock(value: Array<string | null>) {
-    this.set("timelock", Value.fromStringArray(value));
+  set targets(value: Array<string | null>) {
+    this.set("targets", Value.fromStringArray(value));
+  }
+
+  get timelocks(): Array<string | null> {
+    let value = this.get("timelocks");
+    return value.toStringArray();
+  }
+
+  set timelocks(value: Array<string | null>) {
+    this.set("timelocks", Value.fromStringArray(value));
   }
 }
 
-export class Tx extends Entity {
+export class Spell extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -118,17 +179,17 @@ export class Tx extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save Tx entity without an ID");
+    assert(id !== null, "Cannot save Spell entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save Tx entity with non-string ID. " +
+      "Cannot save Spell entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("Tx", id.toString(), this);
+    store.set("Spell", id.toString(), this);
   }
 
-  static load(id: string): Tx | null {
-    return store.get("Tx", id) as Tx | null;
+  static load(id: string): Spell | null {
+    return store.get("Spell", id) as Spell | null;
   }
 
   get id(): string {
@@ -138,6 +199,23 @@ export class Tx extends Entity {
 
   set id(value: string) {
     this.set("id", Value.fromString(value));
+  }
+
+  get description(): string | null {
+    let value = this.get("description");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set description(value: string | null) {
+    if (value === null) {
+      this.unset("description");
+    } else {
+      this.set("description", Value.fromString(value as string));
+    }
   }
 
   get eta(): BigInt {
@@ -167,6 +245,15 @@ export class Tx extends Entity {
     this.set("createdAtTransaction", Value.fromString(value));
   }
 
+  get expiresAtTimestamp(): BigInt {
+    let value = this.get("expiresAtTimestamp");
+    return value.toBigInt();
+  }
+
+  set expiresAtTimestamp(value: BigInt) {
+    this.set("expiresAtTimestamp", Value.fromBigInt(value));
+  }
+
   get value(): BigInt {
     let value = this.get("value");
     return value.toBigInt();
@@ -174,6 +261,15 @@ export class Tx extends Entity {
 
   set value(value: BigInt) {
     this.set("value", Value.fromBigInt(value));
+  }
+
+  get functionName(): string {
+    let value = this.get("functionName");
+    return value.toString();
+  }
+
+  set functionName(value: string) {
+    this.set("functionName", Value.fromString(value));
   }
 
   get signature(): string {
@@ -210,6 +306,15 @@ export class Tx extends Entity {
 
   set timelock(value: string) {
     this.set("timelock", Value.fromString(value));
+  }
+
+  get platform(): string {
+    let value = this.get("platform");
+    return value.toString();
+  }
+
+  set platform(value: string) {
+    this.set("platform", Value.fromString(value));
   }
 
   get isCancelled(): boolean {
@@ -329,6 +434,15 @@ export class Target extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get name(): string {
+    let value = this.get("name");
+    return value.toString();
+  }
+
+  set name(value: string) {
+    this.set("name", Value.fromString(value));
+  }
+
   get platform(): string {
     let value = this.get("platform");
     return value.toString();
@@ -338,22 +452,22 @@ export class Target extends Entity {
     this.set("platform", Value.fromString(value));
   }
 
-  get param(): Array<string | null> {
-    let value = this.get("param");
+  get params(): Array<string | null> {
+    let value = this.get("params");
     return value.toStringArray();
   }
 
-  set param(value: Array<string | null>) {
-    this.set("param", Value.fromStringArray(value));
+  set params(value: Array<string | null>) {
+    this.set("params", Value.fromStringArray(value));
   }
 
-  get tx(): Array<string | null> {
-    let value = this.get("tx");
+  get spells(): Array<string | null> {
+    let value = this.get("spells");
     return value.toStringArray();
   }
 
-  set tx(value: Array<string | null>) {
-    this.set("tx", Value.fromStringArray(value));
+  set spells(value: Array<string | null>) {
+    this.set("spells", Value.fromStringArray(value));
   }
 }
 

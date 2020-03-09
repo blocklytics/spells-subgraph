@@ -1,4 +1,4 @@
-import { Address, log } from "@graphprotocol/graph-ts"
+import { log } from "@graphprotocol/graph-ts"
 import { 
     CancelTransaction, 
     ExecuteTransaction, 
@@ -7,16 +7,16 @@ import {
     NewPendingAdmin, 
     QueueTransaction 
 } from '../../../generated/Compound_Timelock/Timelock'
-import { Timelock, Tx } from '../../../generated/schema'
+import { Timelock, Spell } from '../../../generated/schema'
 import { 
-    createAndReturnTx
+    createAndReturnSpell
 } from './helpers'
 
 export function handleCancelTransaction(event: CancelTransaction): void {
     let id = event.params.txHash.toHexString() // Signature of the transaction - not a transaction hash!
-    let tx = Tx.load(id)
+    let tx = Spell.load(id)
     if (tx === null) {
-        log.error("(CancelTransaction) Tx id not found: {}", [id])
+        log.error("Compound Timelock handleCancelTransaction. Spell id not found: {}", [id])
         return
     }
     tx.isCancelled = true
@@ -27,9 +27,9 @@ export function handleCancelTransaction(event: CancelTransaction): void {
 
 export function handleExecuteTransaction(event: ExecuteTransaction): void {
     let id = event.params.txHash.toHexString() // Signature of the transaction - not a transaction hash!
-    let tx = Tx.load(id)
+    let tx = Spell.load(id)
     if (tx === null) {
-        log.error("(CancelTransaction) Tx id not found: {}", [id])
+        log.error("Compound Timelock handleExecuteTransaction. Spell id not found: {}", [id])
         return
     }
     tx.isExecuted = true
@@ -38,12 +38,25 @@ export function handleExecuteTransaction(event: ExecuteTransaction): void {
     tx.save()
 }
 
-export function handleNewAdmin(event: NewAdmin): void {}
+export function handleNewAdmin(event: NewAdmin): void {
+    let id = event.address.toHexString()
+    let timelock = Timelock.load(id)
+    if (timelock === null) {
+        log.error("Compound Timelock handleExecuteTransaction. Timelock id not found: {}", [id])
+        return
+    }
+    timelock.currentAdmin = event.params.newAdmin.toHexString()
+    timelock.save()
+}
 
-export function handleNewDelay(event: NewDelay): void {}
+export function handleNewDelay(event: NewDelay): void {
+    // TODO - See https://github.com/blocklytics/spells-subgraph/issues/5
+}
 
-export function handleNewPendingAdmin(event: NewPendingAdmin): void {}
+export function handleNewPendingAdmin(event: NewPendingAdmin): void {
+    // TODO - See https://github.com/blocklytics/spells-subgraph/issues/13
+}
 
 export function handleQueueTransaction(event: QueueTransaction): void {
-    createAndReturnTx(event)
+    createAndReturnSpell(event)
 }

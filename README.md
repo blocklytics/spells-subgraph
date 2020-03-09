@@ -1,10 +1,12 @@
 # Spells Subgraph
 
-https://thegraph.com/explorer/subgraph/blocklytics/spells
+Deployed at https://thegraph.com/explorer/subgraph/blocklytics/spells
 
-Built with The Graph. For more information see the docs on https://thegraph.com/docs/.
+### Built with The Graph
 
-# Front-end
+For more information see the docs on https://thegraph.com/docs/.
+
+### Front-end
 
 Deployed at https://spells.fyi/
 
@@ -24,16 +26,16 @@ Code at https://github.com/blocklytics/spells-fyi
 
 Contributions welcome! Please check the issues list for inspiration.
 
-## Schema
+### Schema
 
 The schema consists of five entities:
 1. `Platform` - the DeFi platform - [Example query](https://thegraph.com/explorer/subgraph/blocklytics/spells?query=Platforms)
 1. `Timelock` - the timelock implementation - [Example query](https://thegraph.com/explorer/subgraph/blocklytics/spells?query=Timelocks)
-1. `Tx` - the spell (i.e. a timelocked transaction) - [Example query](https://thegraph.com/explorer/subgraph/blocklytics/spells?query=Transactions)
+1. `Spell` - the timelocked transaction - [Example query](https://thegraph.com/explorer/subgraph/blocklytics/spells?query=Spells)
 1. `Target` - contract the spell will affect - [Example query](https://thegraph.com/explorer/subgraph/blocklytics/spells?query=Targets)
 1. `Param` - (not currently used) effect the spell will have
 
-## Adding platforms
+### Adding platforms
 
 Checklist:
 *  Add ABIs to `/abis/<Platform>`

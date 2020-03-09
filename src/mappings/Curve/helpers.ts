@@ -1,59 +1,78 @@
-import { Address, BigInt, log } from "@graphprotocol/graph-ts"
-import { CurveY as CurveYContract, CommitNewParameters, NewParameters } from '../../../generated/Curve_CurveY/CurveY'
-import { Platform, Target, Timelock, Tx } from '../../../generated/schema'
+import { BigInt, log } from "@graphprotocol/graph-ts"
+import { CommitNewParameters, CommitNewAdmin } from '../../../generated/Curve_CurveY/CurveY'
+import { Spell } from '../../../generated/schema'
+import { createPlatform, createTimelock, createTarget } from "../helpers"
 
-const PLATFORM = "Curve"
+export const PLATFORM = "Curve"
 
-export function createAndReturnTx(event: CommitNewParameters): Tx {
-    let id = PLATFORM + "-" + event.params.deadline.toHexString()
-    let tx = Tx.load(id)
+function createPlatformForCurve(): void {
+    createPlatform(PLATFORM, true, true, "0xc447fcaf1def19a583f97b3620627bf69c05b5fb") // Set at deployment
+}
+
+export function createAndReturnSpellForNewAdmin(event: CommitNewAdmin): Spell {
+    let id = PLATFORM + "-" + event.params.admin.toHexString()
+    let tx = Spell.load(id)
     if (tx === null) {
-        tx = new Tx(id)
-        createTimelock(event.address)
-        createTarget(event.address)
+        createPlatformForCurve() // Ensure platform is created
 
+        let timelockAddress = event.address
+        createTimelock(timelockAddress, PLATFORM) // Ensure timelock is created
+
+        let targetAddress = event.address
+        createTarget(targetAddress, PLATFORM) // Ensure target is created
+
+        tx = new Spell(id)
+        tx.description = "New Admin"
         tx.createdAtTimestamp = event.block.timestamp
         tx.createdAtTransaction = event.transaction.hash.toHexString()
+        tx.expiresAtTimestamp = BigInt.fromI32(0) // TODO - updates for kill deadline
         tx.eta = event.params.deadline
         tx.value = BigInt.fromI32(0)
-        tx.signature = "NewParameters"
-        tx.data = event.params.A.toString() + "-" + event.params.admin_fee.toString() + "-" + event.params.fee.toString()
-        tx.target = event.address.toHexString()
-        tx.timelock = event.address.toHexString()
+        tx.functionName = "commit_transfer_ownership(_owner: address)"
+        tx.signature = "0x6b441a40"
+        tx.data = event.params.admin.toHexString()
+        tx.platform = PLATFORM
+        tx.target = targetAddress.toHexString()
+        tx.timelock = timelockAddress.toHexString()
         tx.isCancelled = false
         tx.isExecuted = false
         tx.save()
     }
-    return tx as Tx
+    return tx as Spell
 }
 
-export function createTimelock(address: Address): void {
-    createPlatform()
-    let id = address.toHexString()
-    let timelock = Timelock.load(id)
-    if (timelock === null) {
-        timelock = new Timelock(id)
-        timelock.platform = PLATFORM
-        timelock.save()
+export function createAndReturnSpellForNewParameters(event: CommitNewParameters): Spell {
+    let id = PLATFORM + "-" + event.params.A.toString() + "-" + event.params.admin_fee.toString() + "-" + event.params.fee.toString()
+    let tx = Spell.load(id)
+    if (tx === null) {
+        createPlatformForCurve() // Ensure platform is created
+
+        let timelockAddress = event.address
+        createTimelock(timelockAddress, PLATFORM) // Ensure timelock is created
+
+        let targetAddress = event.address
+        createTarget(targetAddress, PLATFORM) // Ensure target is created
+
+        tx = new Spell(id)
+        tx.description = "New Parameters"
+        tx.createdAtTimestamp = event.block.timestamp
+        tx.createdAtTransaction = event.transaction.hash.toHexString()
+        tx.expiresAtTimestamp = BigInt.fromI32(0) // TODO - update for kill deadline
+        tx.eta = event.params.deadline
+        tx.value = BigInt.fromI32(0)
+        tx.functionName = "commit_new_parameters(uint256 amplification, uint256 new_fee, uint256 new_admin_fee)"
+        tx.signature = "0xee11f5b6"
+        tx.data = event.params.A.toString() + "-" + event.params.admin_fee.toString() + "-" + event.params.fee.toString()
+        tx.platform = PLATFORM
+        tx.target = targetAddress.toHexString()
+        tx.timelock = timelockAddress.toHexString()
+        tx.isCancelled = false
+        tx.isExecuted = false
+        tx.save()
+    } else {
+        // id may not be unique
+        let debug_id = event.transaction.hash.toHexString()
+        log.warning("CurveY createAndReturnSpellForNewParameters. Duplicate id found for tx {}", [debug_id])
     }
-}
-
-export function createTarget(address: Address): void {
-    createPlatform()
-    let id = address.toHexString()
-    let target = Target.load(id)
-    if (target === null) {
-        target = new Target(id)
-        target.platform = PLATFORM
-        target.save()
-    }
-}
-
-export function createPlatform(): void {
-    let id = PLATFORM
-    let platform = Platform.load(id)
-    if (platform === null) {
-        platform = new Platform(id)
-        platform.save()
-    }    
+    return tx as Spell
 }

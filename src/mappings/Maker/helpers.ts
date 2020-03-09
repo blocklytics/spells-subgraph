@@ -1,85 +1,154 @@
 import { Address, BigInt, log } from "@graphprotocol/graph-ts"
 import { DSChief, Etch } from '../../../generated/Maker_DSChief/DSChief'
-import { DSSpell } from '../../../generated/Maker_DSChief/DSSpell'
-import { Platform, Target, Timelock, Tx } from '../../../generated/schema'
+import { DSSpell as DSChief_DSSpell } from '../../../generated/Maker_DSChief/DSSpell'
+import { LogNote } from '../../../generated/Maker_DSPause/DSPause'
+import { DSSpell as DSPause_DSSpell } from '../../../generated/Maker_DSPause/DSSpell'
+import { Spell } from '../../../generated/schema'
+import { createPlatform, createTimelock, createTarget } from "../helpers"
 
 const PLATFORM = "Maker"
 
-export function createTimelock(address: Address): void {
-    createPlatform()
-    let id = address.toHexString()
-    let timelock = Timelock.load(id)
-    if (timelock === null) {
-        timelock = new Timelock(id)
-        timelock.platform = PLATFORM
-        timelock.save()
-    }
+/** Convenience function for creating Maker Platform
+ * 
+ */
+function createPlatformForMaker(): void {
+    createPlatform(PLATFORM, false, true)
 }
 
-export function createTxIfValid(event: Etch): void {
-    let id = event.params.slate.toHexString()  // Slate
-    let tx = Tx.load(id)
+/** Handler for DSPause anonymous event LogNote
+ * 
+ * @dev This will never create a new spell (see DSChief's handleEtch)
+ * @dev The signature will vary based on what state the spell is in:
+ * @dev 0x46d2fbbb = plot (schedule)
+ * @dev 0x168ccd67 = exec (execute)
+ * @dev 0x162c7de3 = drop (cancel)
+ *
+ * @param event DSPause LogNote
+ */
+export function updateSpellFromLogNote(event: LogNote): void {
+    let debug_id = event.transaction.hash.toHexString()
+    // let bar = event.params.bar.toHexString() // ??
+    // let fax = event.params.fax.toHexString() // tx data
+    let foo = "0x".concat(event.params.foo.toHexString().slice(26)) // Spell contract address
+    let guy = event.params.guy.toHexString() // DSProxy
+    let sig = event.params.sig.toHexString() // Signature
+    // let wad = event.params.wad.toString()    // Value
+
+    // log.debug("DSPause createSpellFromLogNote sig {} foo {} guy {} tx {}", [sig, foo, guy, debug_id])
+
+    let id = guy
+    let tx = Spell.load(id)
     if (tx === null) {
-        tx = new Tx(id)
+        // Spell should only ever be created in DSChief Etch and loaded here.
+        log.warning("DSPause createSpellFromLogNote. Unexpected spell in tx {}.", [debug_id])
+        return
+    }
 
-        createTimelock(event.address)
-        /* Query DSCheif for slate info.
-         *   Note: slates are stored in a map and must be accessed individually
-         *   TODO: Only first index is checked - some iteration should be used here
-         */
-        let DSChiefContract = DSChief.bind(event.address)
-        let slateAddressResult = DSChiefContract.try_slates(event.params.slate, BigInt.fromI32(0))
-        if (slateAddressResult.reverted) {
-            // log.warning("slateAddress not found in tx {}", [id])
+    if (sig == "0x46d2fbbb") {
+        // log.debug("DSPause createSpellFromLogNote. Plot {}", [id])
+        let spellAddress = Address.fromHexString(id) as Address
+        let spellContract = DSPause_DSSpell.bind(spellAddress)
+        let etaResult = spellContract.try_eta()
+        if (etaResult.reverted) {
+            log.warning("DSPause createSpellFromLogNote. Plot reverted in tx {} sig {} foo {} guy {}", [debug_id, sig, foo, guy])
         } else {
-            let slateAddress = slateAddressResult.value
-            let slateContract = DSSpell.bind(slateAddress)
-    
-            let sigResult = slateContract.try_sig()
-            let etaResult = slateContract.try_eta()
-            let tagResult = slateContract.try_tag()
-            if (sigResult.reverted || etaResult.reverted || tagResult.reverted) {
-                // log.warning("slateAddress reverted", [])
-            } else {
-                let sig = sigResult.value.toHexString()
-                let eta = etaResult.value
-                let tag = tagResult.value.toHexString()
-                log.debug("slateAddress result {} {} {} slate {}", [sig, eta.toHexString(), tag, id])
-                createTarget(event.address) // TODO check assumption that this is DSChief
-
-                tx.eta = eta
-                tx.createdAtTimestamp = event.block.timestamp
-                tx.createdAtTransaction = event.transaction.hash.toHexString()
-                tx.value = BigInt.fromI32(0) // TODO check assumption that value is not available
-                tx.signature = sig // TODO check assumption that sig = function signature
-                tx.data = tag // TODO check assumption that tag = data
-                tx.target = event.address.toHexString()   // TODO see above
-                tx.timelock = event.address.toHexString() // Should match id in createTimelock function
-                tx.isCancelled = false
-                tx.isExecuted = false
-                tx.save()
-            }
+            tx.eta = etaResult.value
+            tx.save()
         }
     }
-}
-
-export function createTarget(address: Address): void {
-    log.debug("Maker createTarget", [])
-    createPlatform()
-    let id = address.toHexString()
-    let target = Target.load(id)
-    if (target === null) {
-        target = new Target(id)
-        target.platform = PLATFORM
-        target.save()
+    else if (sig == "0x168ccd67") {
+        // log.debug("DSPause createSpellFromLogNote. Exec {}", [id])
+        tx.isExecuted = true
+        tx.executedAtTimestamp = event.block.timestamp
+        tx.executedAtTransaction = event.transaction.hash.toHexString()
+        tx.save()
+    }
+    else if (sig == "0x162c7de3") {
+        // log.debug("DSPause createSpellFromLogNote. Drop {}", [id])
+        tx.isCancelled = true
+        tx.cancelledAtTimestamp = event.block.timestamp
+        tx.cancelledAtTransaction = event.transaction.hash.toHexString()
+        tx.save()
     }
 }
 
-export function createPlatform(): void {
-    let id = PLATFORM
-    let platform = Platform.load(id)
-    if (platform === null) {
-        platform = new Platform(id)
-        platform.save()
-    }    
+/** Creates a new Spell from the DSChief Etch event.
+ * 
+ * @param event DSChief Etch
+ */
+export function createSpellIfValid(event: Etch): void {
+    let debug_id = event.transaction.hash.toHexString()
+    let slate = event.params.slate
+
+    // Query DSChief for slate info.
+    // TODO: Slates are stored in a map and must be accessed individually.
+    //       Only first index is checked - some iteration should be used below
+    let DSChiefContract = DSChief.bind(event.address)
+    let spellAddressResult = DSChiefContract.try_slates(slate, BigInt.fromI32(0))
+    if (spellAddressResult.reverted) return
+
+    // Query spell contract for details
+    let spellAddress = spellAddressResult.value
+    let spellContract = DSChief_DSSpell.bind(spellAddress)
+
+    // Immediately check for reverted values
+    let sigResult = spellContract.try_sig()
+    if (sigResult.reverted) return
+
+    let etaResult = spellContract.try_eta()
+    if (etaResult.reverted) return
+
+    // let tagResult = spellContract.try_tag()
+    // if (tagResult.reverted) return
+
+    let actionResult = spellContract.try_action()
+    if (actionResult.reverted) return
+
+    let pauseResult = spellContract.try_pause()
+    if (pauseResult.reverted) {
+        log.warning("DSChief createSpellIfValid. Timelock could not be created for {}", [spellAddress.toHexString()])
+        return
+    }
+
+    let doneResult = spellContract.try_done()
+    if (doneResult.reverted) return
+
+    // Create new spell
+    let id = spellAddress.toHexString()
+    let tx = Spell.load(id)
+    if (tx === null) {
+        if (doneResult.value) log.warning("DSChief createSpellIfValid. Spell is done {} see tx {}", [id, debug_id])
+        createPlatformForMaker() // Ensure platform is created
+
+        let timelockAddress = pauseResult.value
+        createTimelock(timelockAddress, PLATFORM) // Ensure timelock is created
+
+        let targetAddress = event.address // TODO check assumption that this is DSChief
+        createTarget(targetAddress, PLATFORM) // Ensure target is created
+
+        tx = new Spell(id)
+
+        // Optional description
+        let descriptionResult = spellContract.try_description()
+        if (!descriptionResult.reverted) {
+            tx.description = descriptionResult.value
+        }
+
+        tx.eta = etaResult.value
+        tx.createdAtTimestamp = event.block.timestamp
+        tx.createdAtTransaction = event.transaction.hash.toHexString()
+        tx.expiresAtTimestamp = BigInt.fromI32(0)
+        tx.value = BigInt.fromI32(0) // TODO check assumption that value is not available
+        tx.signature = sigResult.value.toHexString() // TODO - check - this is always 0x61461954
+        tx.functionName = tx.signature // TODO
+        tx.data = actionResult.value.toHexString() // TODO check assumption that data = action makes sense
+        tx.platform = PLATFORM
+        tx.target = targetAddress.toHexString()
+        tx.timelock = timelockAddress.toHexString() // Should match id in createTimelock function
+        tx.isCancelled = false
+        tx.isExecuted = false
+        tx.save()
+    } else {
+        log.warning("DSChief createSpellIfValid. Spell already exists: {}. tx {}", [id, debug_id])
+    }
 }
