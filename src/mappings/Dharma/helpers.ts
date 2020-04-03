@@ -1,6 +1,7 @@
 import { Address, BigInt, log } from "@graphprotocol/graph-ts"
 import { TimelockInitiated } from '../../../generated/Dharma_Timelocker/Timelocker'
 import { Spell } from '../../../generated/schema'
+import { Dharma_UpgradeBeaconController } from '../../../generated/templates'
 import { createPlatform, createTimelock, createTarget } from '../helpers'
 
 export const PLATFORM = "Dharma"
@@ -35,7 +36,12 @@ function createPlatformForDharma(): void {
  * @returns Spell
  */
 export function createAndReturnSpell(event: TimelockInitiated): Spell {
-    let id = PLATFORM + "-" + event.params.arguments.toHexString() // Contract uses hashed value of args
+    // Save arguments
+    let upgradeBeaconControllerAddress = Address.fromString("0x".concat(event.params.arguments.toHexString().slice(26,66)))
+    // let upgradeBeaconAddress = Address.fromString("0x".concat(event.params.arguments.toHexString().slice(90,130))) // Unused
+    let implementationAddress = Address.fromString("0x".concat(event.params.arguments.toHexString().slice(154,194)))
+
+    let id = PLATFORM + "-" + implementationAddress.toHexString()
     let tx = Spell.load(id)
     if (tx === null) {
         createPlatformForDharma() // Ensure platform is created
@@ -43,19 +49,11 @@ export function createAndReturnSpell(event: TimelockInitiated): Spell {
         let timelockAddress = event.address
         createTimelock(timelockAddress, PLATFORM) // Ensure timelock is created
 
-        let targetAddress = Address.fromHexString("0x".concat(event.params.arguments.toHexString().slice(26,66))) as Address // UpgradeBeaconController
+        let targetAddress = upgradeBeaconControllerAddress
         createTarget(targetAddress, PLATFORM) // Ensure target is created
 
-        // log.debug("Dharma new tx args: {} {} {} in tx {}", [
-        //     "0x".concat(event.params.arguments.toHexString().slice(26,66)),   // UpgradeBeaconController
-        //     // Note: the UpgradeBeaconController will emit an Upgrade event with new implementation
-        //     // TODO - See https://github.com/blocklytics/spells-subgraph/issues/12
-        //     //      - Create a template for UpgradeBeaconControllers
-        //     //      - List for Upgrade events to check when a Spell is executed
-        //     "0x".concat(event.params.arguments.toHexString().slice(80,120)),  // UpgradeBeacon
-        //     "0x".concat(event.params.arguments.toHexString().slice(144,184)), // Implementation
-        //     event.transaction.hash.toHexString()
-        // ])
+        // Create from templates
+        Dharma_UpgradeBeaconController.create(upgradeBeaconControllerAddress)
 
         tx = new Spell(id)
         tx.description = "Upgrade"
@@ -73,6 +71,8 @@ export function createAndReturnSpell(event: TimelockInitiated): Spell {
         tx.isCancelled = false
         tx.isExecuted = false
         tx.save()
+     } else {
+         log.warning("Dharma spell already exists for implementation {}", [id])
      }
      return tx as Spell
 }
