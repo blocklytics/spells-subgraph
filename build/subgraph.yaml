@@ -225,3 +225,24 @@ dataSources:
         - event: TimelockIntervalModified(bytes4,uint256,uint256)
           handler: handleTimelockIntervalModified
       file: Dharma_Timelocker/Dharma_Timelocker.wasm
+templates:
+  - kind: ethereum/contract
+    name: Dharma_UpgradeBeaconController
+    network: mainnet
+    source:
+      abi: UpgradeBeaconController
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Spell
+      abis:
+        - name: UpgradeBeaconController
+          file: Dharma_UpgradeBeaconController/abis/Dharma/UpgradeBeaconController.json
+      eventHandlers:
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: Upgraded(indexed address,address,bytes32,address,bytes32)
+          handler: handleUpgraded
+      file: templates/Dharma_UpgradeBeaconController/Dharma_UpgradeBeaconController.wasm
