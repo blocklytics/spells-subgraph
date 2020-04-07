@@ -34,6 +34,15 @@ function createPlatformForCompound(): void {
     createPlatform(PLATFORM, true, true)
 }
 
+/** Convenience function to convert days to seconds
+ * 
+ * @param days
+ * @returns seconds
+ */
+function convertDaysToSeconds(days: BigInt): BigInt {
+    return days.times(BigInt.fromI32(86400))
+}
+
 export function createAndReturnSpell(event: QueueTransaction): Spell {
     let id = event.params.txHash.toHexString() // Signature of the spell (not the transaction hash!)
     let tx = Spell.load(id)
@@ -50,7 +59,7 @@ export function createAndReturnSpell(event: QueueTransaction): Spell {
         tx.eta = event.params.eta
         tx.createdAtTimestamp = event.block.timestamp
         tx.createdAtTransaction = event.transaction.hash.toHexString()
-        tx.expiresAtTimestamp = BigInt.fromI32(0)
+        tx.expiresAtTimestamp = tx.eta.plus(convertDaysToSeconds(BigInt.fromI32(14))) // Compound uses a hard-coded 14-day expiry period
         tx.value = event.params.value
         tx.functionName = event.params.signature
         tx.signature = signatureForName(tx.functionName)
