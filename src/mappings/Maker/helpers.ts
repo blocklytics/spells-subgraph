@@ -74,81 +74,107 @@ export function updateSpellFromLogNote(event: LogNote): void {
 
 /** Creates a new Spell from the DSChief Etch event.
  * 
+ * @dev Slates are stored in a map and must be accessed by iterating the `slates()` function.
+ * @dev There is no error checking at the smart contract level for valid/invalid spells. We assume some required fields:
+ *   - sig
+ *   - eta
+ *   - action
+ *   - pause
+ *   - done
+ * 
  * @param event DSChief Etch
  */
 export function createSpellIfValid(event: Etch): void {
     let debug_id = event.transaction.hash.toHexString()
     let slate = event.params.slate
-
-    // Query DSChief for slate info.
-    // TODO: Slates are stored in a map and must be accessed individually.
-    //       Only first index is checked - some iteration should be used below
     let DSChiefContract = DSChief.bind(event.address)
-    let spellAddressResult = DSChiefContract.try_slates(slate, BigInt.fromI32(0))
-    if (spellAddressResult.reverted) return
-
-    // Query spell contract for details
-    let spellAddress = spellAddressResult.value
-    let spellContract = DSChief_DSSpell.bind(spellAddress)
-
-    // Immediately check for reverted values
-    let sigResult = spellContract.try_sig()
-    if (sigResult.reverted) return
-
-    let etaResult = spellContract.try_eta()
-    if (etaResult.reverted) return
-
-    // let tagResult = spellContract.try_tag()
-    // if (tagResult.reverted) return
-
-    let actionResult = spellContract.try_action()
-    if (actionResult.reverted) return
-
-    let pauseResult = spellContract.try_pause()
-    if (pauseResult.reverted) {
-        log.warning("DSChief createSpellIfValid. Timelock could not be created for {}", [spellAddress.toHexString()])
-        return
-    }
-
-    let doneResult = spellContract.try_done()
-    if (doneResult.reverted) return
-
-    // Create new spell
-    let id = spellAddress.toHexString()
-    let tx = Spell.load(id)
-    if (tx === null) {
-        if (doneResult.value) log.warning("DSChief createSpellIfValid. Spell is done {} see tx {}", [id, debug_id])
-        createPlatformForMaker() // Ensure platform is created
-
-        let timelockAddress = pauseResult.value
-        createTimelock(timelockAddress, PLATFORM) // Ensure timelock is created
-
-        let targetAddress = event.address // TODO check assumption that this is DSChief
-        createTarget(targetAddress, PLATFORM) // Ensure target is created
-
-        tx = new Spell(id)
-
-        // Optional description
-        let descriptionResult = spellContract.try_description()
-        if (!descriptionResult.reverted) {
-            tx.description = descriptionResult.value
+    let i = BigInt.fromI32(0)
+    let isRunning = true
+    while (isRunning) {
+        let spellAddressResult = DSChiefContract.try_slates(slate, i)
+        if (spellAddressResult.reverted) {
+            isRunning = false
+            continue
+        } else {
+            i = i.plus(BigInt.fromI32(1))
         }
 
-        tx.eta = etaResult.value
-        tx.createdAtTimestamp = event.block.timestamp
-        tx.createdAtTransaction = event.transaction.hash.toHexString()
-        tx.expiresAtTimestamp = BigInt.fromI32(0)
-        tx.value = BigInt.fromI32(0) // TODO check assumption that value is not available
-        tx.signature = sigResult.value.toHexString() // TODO - check - this is always 0x61461954
-        tx.functionName = tx.signature // TODO
-        tx.data = actionResult.value.toHexString() // TODO check assumption that data = action makes sense
-        tx.platform = PLATFORM
-        tx.target = targetAddress.toHexString()
-        tx.timelock = timelockAddress.toHexString() // Should match id in createTimelock function
-        tx.isCancelled = false
-        tx.isExecuted = false
-        tx.save()
-    } else {
-        log.warning("DSChief createSpellIfValid. Spell already exists: {}. tx {}", [id, debug_id])
+        // Query spell contract for details
+        let spellAddress = spellAddressResult.value
+        let spellContract = DSChief_DSSpell.bind(spellAddress)
+
+        // Create new spell
+        let id = spellAddress.toHexString()
+        let tx = Spell.load(id)
+        if (tx === null) {
+            // Immediately check for reverted values
+            let sigResult = spellContract.try_sig()
+            if (sigResult.reverted) {
+                log.warning("DSChief createSpellIfValid. Sig reverted for {}", [spellAddress.toHexString()])
+                continue
+            }
+
+            let etaResult = spellContract.try_eta()
+            if (etaResult.reverted) {
+                log.warning("DSChief createSpellIfValid. ETA reverted for {}", [spellAddress.toHexString()])
+                continue
+            }
+
+            // let tagResult = spellContract.try_tag()
+            // if (tagResult.reverted) {
+                // log.warning("DSChief createSpellIfValid. Tag reverted for {}", [spellAddress.toHexString()])
+                // continue
+            // }
+
+            let actionResult = spellContract.try_action()
+            if (actionResult.reverted) {
+                log.warning("DSChief createSpellIfValid. Action reverted for {}", [spellAddress.toHexString()])
+                continue
+            }
+
+            let pauseResult = spellContract.try_pause()
+            if (pauseResult.reverted) {
+                log.warning("DSChief createSpellIfValid. Timelock could not be created for {}", [spellAddress.toHexString()])
+                continue
+            }
+
+            let doneResult = spellContract.try_done()
+            if (doneResult.reverted) {
+                log.warning("DSChief createSpellIfValid. Done reverted for {}", [spellAddress.toHexString()])
+                continue
+            }
+
+            if (doneResult.value) log.warning("DSChief createSpellIfValid. Spell is already done {} see tx {}", [id, debug_id])
+            createPlatformForMaker() // Ensure platform is created
+
+            let timelockAddress = pauseResult.value
+            createTimelock(timelockAddress, PLATFORM) // Ensure timelock is created
+
+            let targetAddress = event.address // TODO check assumption that this is DSChief
+            createTarget(targetAddress, PLATFORM) // Ensure target is created
+
+            tx = new Spell(id)
+
+            // Optional description
+            let descriptionResult = spellContract.try_description()
+            if (!descriptionResult.reverted) {
+                tx.description = descriptionResult.value
+            }
+
+            tx.eta = etaResult.value
+            tx.createdAtTimestamp = event.block.timestamp
+            tx.createdAtTransaction = event.transaction.hash.toHexString()
+            tx.expiresAtTimestamp = BigInt.fromI32(0)
+            tx.value = BigInt.fromI32(0) // TODO check assumption that value is not available
+            tx.signature = sigResult.value.toHexString() // TODO - check - this is always 0x61461954
+            tx.functionName = tx.signature // TODO
+            tx.data = actionResult.value.toHexString() // TODO check assumption that data = action makes sense
+            tx.platform = PLATFORM
+            tx.target = targetAddress.toHexString()
+            tx.timelock = timelockAddress.toHexString() // Should match id in createTimelock function
+            tx.isCancelled = false
+            tx.isExecuted = false
+            tx.save()
+        }
     }
 }
