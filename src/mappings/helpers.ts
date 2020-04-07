@@ -66,6 +66,7 @@ function targetNameForId(address: string): string {
     else if (address == "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359") return "SAI"
     // Compund
     else if (address == "0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b") return "Comptroller"
+    else if (address == "0x97bd4cc841fc999194174cd1803c543247a014fe") return "Comptroller"
     else if (address == "0x4ddc2d193948926d02f9b1fe9e1daa0718270ed5") return "cETH"
     else if (address == "0x5d3a536e4d6dbd6114cc1ead35777bab948e3643") return "cDAI"
     else if (address == "0x39aa39c021dfbae8fac545936693ac917d5e7563") return "cUSDC"
@@ -77,6 +78,7 @@ function targetNameForId(address: string): string {
     else if (address == "0x6d903f6003cca6255d85cca4d3b5e5146dc33925") return "Timelock"
     // Curve
     else if (address == "0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51") return "Curve Y"
+    else if (address == "0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27") return "Curve B"
     // DDEX
     else if (address == "0x74622073a4821dbfd046e9aa2ccf691341a076e1") return "Proxy"
     // Dharma
