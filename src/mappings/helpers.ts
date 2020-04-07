@@ -78,6 +78,7 @@ function targetNameForId(address: string): string {
     else if (address == "0x6d903f6003cca6255d85cca4d3b5e5146dc33925") return "Timelock"
     // Curve
     else if (address == "0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51") return "Curve Y"
+    else if (address == "0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27") return "Curve B"
     // DDEX
     else if (address == "0x74622073a4821dbfd046e9aa2ccf691341a076e1") return "Proxy"
     // Dharma

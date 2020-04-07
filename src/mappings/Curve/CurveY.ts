@@ -20,7 +20,7 @@ export function handleCommitNewAdmin(event: CommitNewAdmin): void {
  */
 export function handleNewAdmin(event: NewAdmin): void {
     // Set Spell isExecuted true
-    let id = PLATFORM + event.params.admin.toHexString()
+    let id = PLATFORM + "-" + event.address.toHexString() + "-" + event.params.admin.toHexString()
     let tx = Spell.load(id)
     if (tx === null) {
         log.warning("CurveY Spell not found {}", [id])
@@ -67,7 +67,7 @@ export function handleCommitNewParameters(event: CommitNewParameters): void {
  * @dev TODO - Any outstanding spells should be set to Cancelled
  */
 export function handleNewParameters(event: NewParameters): void {
-    let id = PLATFORM + "-" + event.params.A.toString() + "-" + event.params.admin_fee.toString() + "-" + event.params.fee.toString()
+    let id = PLATFORM + "-" + event.address.toHexString() + "-" + event.params.A.toString() + "-" + event.params.admin_fee.toString() + "-" + event.params.fee.toString()
     let tx = Spell.load(id)
     if (tx === null) {
         let debug_id = event.transaction.hash.toHexString()

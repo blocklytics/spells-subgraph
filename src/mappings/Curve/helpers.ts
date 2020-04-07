@@ -10,7 +10,7 @@ function createPlatformForCurve(): void {
 }
 
 export function createAndReturnSpellForNewAdmin(event: CommitNewAdmin): Spell {
-    let id = PLATFORM + "-" + event.params.admin.toHexString()
+    let id = PLATFORM + "-" + event.address.toHexString() + "-" + event.params.admin.toHexString()
     let tx = Spell.load(id)
     if (tx === null) {
         createPlatformForCurve() // Ensure platform is created
@@ -42,7 +42,7 @@ export function createAndReturnSpellForNewAdmin(event: CommitNewAdmin): Spell {
 }
 
 export function createAndReturnSpellForNewParameters(event: CommitNewParameters): Spell {
-    let id = PLATFORM + "-" + event.params.A.toString() + "-" + event.params.admin_fee.toString() + "-" + event.params.fee.toString()
+    let id = PLATFORM + "-" + event.address.toHexString() + "-" + event.params.A.toString() + "-" + event.params.admin_fee.toString() + "-" + event.params.fee.toString()
     let tx = Spell.load(id)
     if (tx === null) {
         createPlatformForCurve() // Ensure platform is created
