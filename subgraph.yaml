@@ -156,6 +156,50 @@ dataSources:
           handler: handleUnlockTimeSet
       file: ./src/mappings/DDEX/Timelock.ts
   - kind: ethereum/contract
+    name: DyDx_PartiallyDelayedMultiSig
+    network: mainnet
+    source:
+      address: '0xba2906b18b069b40c6d2cafd392e76ad479b1b53'
+      abi: PartiallyDelayedMultiSig
+      startBlock: 7671441
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Timelock
+        - Spell
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: PartiallyDelayedMultiSig
+          file: ./abis/DyDx/PartiallyDelayedMultiSig.json
+      eventHandlers:
+        - event: Confirmation(indexed address,indexed uint256)
+          handler: handleConfirmation
+        - event: ConfirmationTimeSet(indexed uint256,uint256)
+          handler: handleConfirmationTimeSet
+        - event: Execution(indexed uint256)
+          handler: handleExecution
+        - event: ExecutionFailure(indexed uint256)
+          handler: handleExecutionFailure
+        - event: OwnerAddition(indexed address)
+          handler: handleOwnerAddition
+        - event: OwnerRemoval(indexed address)
+          handler: handleOwnerRemoval
+        - event: RequirementChange(uint256)
+          handler: handleRequirementChange
+        - event: Revocation(indexed address,indexed uint256)
+          handler: handleRevocation
+        - event: SelectorSet(address,bytes4,bool)
+          handler: handleSelectorSet
+        - event: Submission(indexed uint256)
+          handler: handleSubmission
+        - event: TimeLockChange(uint32)
+          handler: handleTimeLockChange
+      file: ./src/mappings/DyDx/PartiallyDelayedMultiSig.ts
+  - kind: ethereum/contract
     name: Curve_CurveY
     network: mainnet
     source:
