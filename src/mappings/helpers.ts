@@ -86,6 +86,11 @@ function targetNameForId(address: string): string {
     else if (address == "0x00000000002226c940b74d674b85e4be05539663") return "Upgrade Beacon Controller"
     else if (address == "0x00000000011df015e8ad00d7b2486a88c2eb8210") return "Key Ring Upgrader"
     else if (address == "0x0000000000796dc3aa12eb9fe3b6e8f4d92cc966") return "USDC Upgrade Beacon Controller"
+    // DyDx
+    else if (address == "0x1e0447b19bb6ecfdae1e4ae1694b0c3659614e4e") return "SoloMargin"
+    else if (address == "0xba2906b18b069b40c6d2cafd392e76ad479b1b53") return "Timelock"
+    else if (address == "0x93ae58cc1d029bbdf8b53a89337f4abb63f6d588") return "StopLimitOrders"
+    else if (address == "0x787f552bdc17332c98aa360748884513e3cb401a") return "DaiPriceOracle"
     // Other
     return address
 }
