@@ -47,5 +47,28 @@ type Target @entity {
 
 type Param @entity {
   id: ID!
-  target: Target!
+  description: String!      # Human-readable description
+  currentValue: String!     # String representation of the value
+  platform: Platform!       # Affected platform
+  target: Target!           # Affected contract
+  history: [ParamHistory]! @derivedFrom(field:"param")
+  proposals: [ParamProposal]! @derivedFrom(field:"param")
+}
+
+type ParamHistory @entity {
+  id: ID!
+  param: Param!
+  oldValue: String!
+  newValue: String!
+  changedInSpell: Spell! # Spell that changed the Param when it was executed
+  timestamp: BigInt!     # Time of spell execution
+}
+
+type ParamProposal @entity {
+  id: ID!
+  param: Param!
+  proposedValue: String!
+  proposedInSpell: Spell!
+  timestamp: BigInt!      # Time of spell creation
+  eta: BigInt!            # Eta of spell
 }
