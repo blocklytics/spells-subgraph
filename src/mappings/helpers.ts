@@ -118,6 +118,8 @@ function targetNameForId(address: string): string {
     // Curve
     else if (address == "0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51") return "Curve Y"
     else if (address == "0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27") return "Curve B"
+    else if (address == "0xa5407eae9ba41422680e2e00537571bcc53efbfd") return "Curve S" // v2
+    else if (address == "0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56") return "Curve C"
     // DDEX
     else if (address == "0x74622073a4821dbfd046e9aa2ccf691341a076e1") return "Proxy"
     // Dharma

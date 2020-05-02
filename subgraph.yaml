@@ -466,6 +466,66 @@ dataSources:
           handler: handleNewParameters
       file: ./src/mappings/Curve/CurveY.ts
   - kind: ethereum/contract
+    name: Curve_CurveS_v2
+    network: mainnet
+    source:
+      address: '0xa5407eae9ba41422680e2e00537571bcc53efbfd'
+      abi: CurveY
+      startBlock: 9906598
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Timelock
+        - Spell
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: CurveY
+          file: ./abis/Curve/CurveY.json
+      eventHandlers:
+        - event: CommitNewAdmin(indexed uint256,indexed address)
+          handler: handleCommitNewAdmin
+        - event: NewAdmin(indexed address)
+          handler: handleNewAdmin
+        - event: CommitNewParameters(indexed uint256,uint256,uint256,uint256)
+          handler: handleCommitNewParameters
+        - event: NewParameters(uint256,uint256,uint256)
+          handler: handleNewParameters
+      file: ./src/mappings/Curve/CurveY.ts
+  - kind: ethereum/contract
+    name: Curve_CurveC
+    network: mainnet
+    source:
+      address: '0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56'
+      abi: CurveY
+      startBlock: 9554040
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Timelock
+        - Spell
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: CurveY
+          file: ./abis/Curve/CurveY.json
+      eventHandlers:
+        - event: CommitNewAdmin(indexed uint256,indexed address)
+          handler: handleCommitNewAdmin
+        - event: NewAdmin(indexed address)
+          handler: handleNewAdmin
+        - event: CommitNewParameters(indexed uint256,uint256,uint256,uint256)
+          handler: handleCommitNewParameters
+        - event: NewParameters(uint256,uint256,uint256)
+          handler: handleNewParameters
+      file: ./src/mappings/Curve/CurveY.ts
+  - kind: ethereum/contract
     name: Dharma_Timelocker
     network: mainnet
     source:
