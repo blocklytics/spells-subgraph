@@ -131,7 +131,7 @@ dataSources:
         - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
           topic0: "0x29ae811400000000000000000000000000000000000000000000000000000000"
           handler: handleLogNoteSetDelay
-      file: Maker_MCDFlapper/Maker_MCDFlapper.wasm
+      file: Maker_MCDSpotter/Maker_MCDSpotter.wasm
   - kind: ethereum/contract
     name: Maker_MCDPot
     network: mainnet
@@ -155,7 +155,13 @@ dataSources:
       eventHandlers:
         - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
           topic0: "0x29ae811400000000000000000000000000000000000000000000000000000000"
-          handler: handleLogNoteSetDelay
+          handler: handleLogNoteFileForDsr
+        - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
+          topic0: "0xd4e8be8300000000000000000000000000000000000000000000000000000000"
+          handler: handleLogNoteFileForVow
+        - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
+          topic0: "0x6924500900000000000000000000000000000000000000000000000000000000"
+          handler: handleLogNoteFileForCage
       file: Maker_MCDPot/Maker_MCDPot.wasm
   - kind: ethereum/contract
     name: Maker_MCDJug
@@ -163,7 +169,7 @@ dataSources:
     source:
       address: "0x19c0976f590D67707E62397C87829d896Dc0f1F1"
       abi: MCDJug
-      startBlock: 8928152
+      startBlock: 8928160
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -187,7 +193,7 @@ dataSources:
     network: mainnet
     source:
       address: "0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B"
-      abi: MCDJug
+      abi: MCDVat
       startBlock: 8928152
     mapping:
       kind: ethereum/events
@@ -200,13 +206,88 @@ dataSources:
         - Target
         - Param
       abis:
-        - name: MCDJug
-          file: Maker_MCDVat/abis/Maker/MCDJug.json
+        - name: MCDVat
+          file: Maker_MCDVat/abis/Maker/MCDVat.json
+      eventHandlers:
+        - event: LogNote(indexed bytes4,indexed bytes32,indexed bytes32,indexed bytes32,bytes)
+          topic0: "0x29ae811400000000000000000000000000000000000000000000000000000000"
+          handler: handleLogNoteSetDelay
+      file: Maker_MCDVat/Maker_MCDVat.wasm
+  - kind: ethereum/contract
+    name: Maker_MCDVow
+    network: mainnet
+    source:
+      address: "0xA950524441892A31ebddF91d3cEEFa04Bf454466"
+      abi: MCDVow
+      startBlock: 8928163
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Spell
+        - Timelock
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: MCDVow
+          file: Maker_MCDVow/abis/Maker/MCDVow.json
       eventHandlers:
         - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
           topic0: "0x29ae811400000000000000000000000000000000000000000000000000000000"
           handler: handleLogNoteSetDelay
-      file: Maker_MCDJug/Maker_MCDJug.wasm
+      file: Maker_MCDVow/Maker_MCDVow.wasm
+  - kind: ethereum/contract
+    name: Maker_MCDCat
+    network: mainnet
+    source:
+      address: "0x78F2c2AF65126834c51822F56Be0d7469D7A523E"
+      abi: MCDCat
+      startBlock: 8928165
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Spell
+        - Timelock
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: MCDCat
+          file: Maker_MCDCat/abis/Maker/MCDCat.json
+      eventHandlers:
+        - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
+          topic0: "0xebecb39d00000000000000000000000000000000000000000000000000000000"
+          handler: handleFlipFile
+      file: Maker_MCDCat/Maker_MCDCat.wasm
+  - kind: ethereum/contract
+    name: Maker_Flopper
+    network: mainnet
+    source:
+      address: "0x4D95A049d5B0b7d32058cd3F2163015747522e99"
+      abi: Flopper
+      startBlock: 9006717
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Spell
+        - Timelock
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: Flopper
+          file: Maker_Flopper/abis/Maker/Flopper.json
+      eventHandlers:
+        - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
+          topic0: "0x29ae811400000000000000000000000000000000000000000000000000000000"
+          handler: handleLogNoteSetDelay
+      file: Maker_Flopper/Maker_Flopper.wasm
   - kind: ethereum/contract
     name: Compound_Timelock
     network: mainnet
@@ -230,7 +311,8 @@ dataSources:
       eventHandlers:
         - event: CancelTransaction(indexed bytes32,indexed address,uint256,string,bytes,uint256)
           handler: handleCancelTransaction
-        - event: ExecuteTransaction(indexed bytes32,indexed address,uint256,string,bytes,uint256)
+        - event: ExecuteTransaction(indexed bytes32,indexed
+            address,uint256,string,bytes,uint256)
           handler: handleExecuteTransaction
         - event: NewAdmin(indexed address)
           handler: handleNewAdmin

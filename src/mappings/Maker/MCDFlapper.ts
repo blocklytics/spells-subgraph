@@ -1,28 +1,44 @@
 import { log } from "@graphprotocol/graph-ts"
 import { LogNote } from '../../../generated/Maker_MCDFlapper/MCDFlapper'
-import { Spell } from '../../../generated/schema'
-import { updateSpellFromLogNote } from './helpers'
+import { createParam, convertHexStringToBigIntString } from '../helpers'
 
 /** Handles anonymous event for `setDelay(address)`
  * 
- * @dev TODO - See See https://github.com/blocklytics/spells-subgraph/issues/5
+ * @dev Maker docs https://docs.makerdao.com/smart-contract-modules/system-stabilizer-module/flap-detailed-documentation
  */
 export function handleLogNoteSetDelay(event: LogNote): void {
-    let debug_id = event.transaction.hash.toHexString()
-    let arg1 = event.params.arg1.toHexString() // ??
-    let arg2 = event.params.arg2.toHexString() // ??
-    let usr = event.params.usr.toHexString()   // Spell contract address
-    let sig = event.params.sig.toHexString()   // Signature // Lift = 0x3c278bd5
-    let data = event.params.data.toHexString() // Value
+    let what = event.params.arg1.toString()
+    let fax = event.params.arg2.toHexString()
+    // let usr = event.params.usr.toHexString()   // ??
 
-    log.debug("MCDFlapper  setDelay for spell {} in tx {}", [usr, debug_id])
-
-    let tx = Spell.load(usr)
-    if (tx === null) {
-        log.debug("MCDFlapper setDelay. Spell is null in tx {}. {} {} {} {} {}", [debug_id, arg1, arg2, usr, sig, data])
-        // TODO - check assumption that only etched spells can be lifted?
-    } else {
-        log.debug("MCDFlapper setDelay. Spell found in tx {}. {} {} {} {} {}", [debug_id, arg1, arg2, usr, sig, data])
-        // TODO - check that spells are being found
+    if (what == "beg") {
+        createParam(
+            "MCDFlapper-".concat(what),
+            "Minimum bid increase",
+            "Maker",
+            event.address.toHexString(),
+            convertHexStringToBigIntString(fax)
+        )
+    }
+    else if (what == "ttl") {
+        createParam(
+            "MCDFlapper-".concat(what),
+            "Bid lifetime",
+            "Maker",
+            event.address.toHexString(),
+            convertHexStringToBigIntString(fax)
+        )
+    }
+    else if (what == "tau") {
+        createParam(
+            "MCDFlapper-".concat(what),
+            "Maximum auction duration",
+            "Maker",
+            event.address.toHexString(),
+            convertHexStringToBigIntString(fax)
+        )
+    }
+    else {
+        log.warning("MCDFlapper what not handled: {} {}", [what, fax])
     }
 }

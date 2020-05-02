@@ -165,13 +165,13 @@ export function createSpellIfValid(event: Etch): void {
             tx.createdAtTimestamp = event.block.timestamp
             tx.createdAtTransaction = event.transaction.hash.toHexString()
             tx.expiresAtTimestamp = BigInt.fromI32(0)
-            tx.value = BigInt.fromI32(0) // TODO check assumption that value is not available
+            tx.value = BigInt.fromI32(0)                 // TODO check assumption that value is not available
             tx.signature = sigResult.value.toHexString() // TODO - check - this is always 0x61461954
-            tx.functionName = tx.signature // TODO
-            tx.data = actionResult.value.toHexString() // TODO check assumption that data = action makes sense
+            tx.functionName = tx.signature               // TODO
+            tx.data = actionResult.value.toHexString()   // TODO check assumption that data = action makes sense
             tx.platform = PLATFORM
             tx.target = targetAddress.toHexString()
-            tx.timelock = timelockAddress.toHexString() // Should match id in createTimelock function
+            tx.timelock = timelockAddress.toHexString()  // Should match id in createTimelock function
             tx.isCancelled = false
             tx.isExecuted = false
             tx.save()
