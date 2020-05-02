@@ -501,6 +501,33 @@ export class Param extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get description(): string {
+    let value = this.get("description");
+    return value.toString();
+  }
+
+  set description(value: string) {
+    this.set("description", Value.fromString(value));
+  }
+
+  get currentValue(): string {
+    let value = this.get("currentValue");
+    return value.toString();
+  }
+
+  set currentValue(value: string) {
+    this.set("currentValue", Value.fromString(value));
+  }
+
+  get platform(): string {
+    let value = this.get("platform");
+    return value.toString();
+  }
+
+  set platform(value: string) {
+    this.set("platform", Value.fromString(value));
+  }
+
   get target(): string {
     let value = this.get("target");
     return value.toString();
@@ -508,5 +535,175 @@ export class Param extends Entity {
 
   set target(value: string) {
     this.set("target", Value.fromString(value));
+  }
+
+  get history(): Array<string | null> {
+    let value = this.get("history");
+    return value.toStringArray();
+  }
+
+  set history(value: Array<string | null>) {
+    this.set("history", Value.fromStringArray(value));
+  }
+
+  get proposals(): Array<string | null> {
+    let value = this.get("proposals");
+    return value.toStringArray();
+  }
+
+  set proposals(value: Array<string | null>) {
+    this.set("proposals", Value.fromStringArray(value));
+  }
+}
+
+export class ParamHistory extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save ParamHistory entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save ParamHistory entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("ParamHistory", id.toString(), this);
+  }
+
+  static load(id: string): ParamHistory | null {
+    return store.get("ParamHistory", id) as ParamHistory | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get param(): string {
+    let value = this.get("param");
+    return value.toString();
+  }
+
+  set param(value: string) {
+    this.set("param", Value.fromString(value));
+  }
+
+  get oldValue(): string {
+    let value = this.get("oldValue");
+    return value.toString();
+  }
+
+  set oldValue(value: string) {
+    this.set("oldValue", Value.fromString(value));
+  }
+
+  get newValue(): string {
+    let value = this.get("newValue");
+    return value.toString();
+  }
+
+  set newValue(value: string) {
+    this.set("newValue", Value.fromString(value));
+  }
+
+  get changedInSpell(): string {
+    let value = this.get("changedInSpell");
+    return value.toString();
+  }
+
+  set changedInSpell(value: string) {
+    this.set("changedInSpell", Value.fromString(value));
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+}
+
+export class ParamProposal extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save ParamProposal entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save ParamProposal entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("ParamProposal", id.toString(), this);
+  }
+
+  static load(id: string): ParamProposal | null {
+    return store.get("ParamProposal", id) as ParamProposal | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get param(): string {
+    let value = this.get("param");
+    return value.toString();
+  }
+
+  set param(value: string) {
+    this.set("param", Value.fromString(value));
+  }
+
+  get proposedValue(): string {
+    let value = this.get("proposedValue");
+    return value.toString();
+  }
+
+  set proposedValue(value: string) {
+    this.set("proposedValue", Value.fromString(value));
+  }
+
+  get proposedInSpell(): string {
+    let value = this.get("proposedInSpell");
+    return value.toString();
+  }
+
+  set proposedInSpell(value: string) {
+    this.set("proposedInSpell", Value.fromString(value));
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+
+  get eta(): BigInt {
+    let value = this.get("eta");
+    return value.toBigInt();
+  }
+
+  set eta(value: BigInt) {
+    this.set("eta", Value.fromBigInt(value));
   }
 }
