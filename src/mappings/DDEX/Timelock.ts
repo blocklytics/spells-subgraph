@@ -21,6 +21,7 @@ export function handleExecution(event: Execution): void {
 export function handleExecutionFailure(event: ExecutionFailure): void {}
 export function handleLockSecondsChange(event: LockSecondsChange): void {
     // Delay changed
+    log.warning("DDEX Timelock LockSecondsChange not handled {}", [event.params.lockSeconds.toString()])
 }
 export function handleOwnerAddition(event: OwnerAddition): void {}
 export function handleOwnerRemoval(event: OwnerRemoval): void {}
