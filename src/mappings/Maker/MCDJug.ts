@@ -1,6 +1,5 @@
 import { log } from "@graphprotocol/graph-ts"
 import { LogNote } from '../../../generated/Maker_MCDJug/MCDJug'
-import { Spell } from '../../../generated/schema'
 
 /** Handles anonymous event for `setDelay(address)`
  * 
