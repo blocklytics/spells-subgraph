@@ -149,8 +149,14 @@ dataSources:
           file: ./abis/Maker/MCDPot.json
       eventHandlers:
         - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
-          topic0: '0x29ae811400000000000000000000000000000000000000000000000000000000' # Anonymous event for `setDelay`
-          handler: handleLogNoteSetDelay
+          topic0: '0x29ae811400000000000000000000000000000000000000000000000000000000' # Anonymous event for `file`
+          handler: handleLogNoteFileForDsr
+        - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
+          topic0: '0xd4e8be8300000000000000000000000000000000000000000000000000000000' # Anonymous event for `file`
+          handler: handleLogNoteFileForVow
+        - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
+          topic0: '0x6924500900000000000000000000000000000000000000000000000000000000' # Anonymous event for `cage`
+          handler: handleLogNoteFileForCage
       file: ./src/mappings/Maker/MCDPot.ts
   - kind: ethereum/contract
     name: Maker_MCDJug
@@ -198,7 +204,7 @@ dataSources:
         - name: MCDVat
           file: ./abis/Maker/MCDVat.json
       eventHandlers:
-        - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
+        - event: LogNote(indexed bytes4,indexed bytes32,indexed bytes32,indexed bytes32,bytes)
           topic0: '0x29ae811400000000000000000000000000000000000000000000000000000000' # Anonymous event for `setDelay`
           handler: handleLogNoteSetDelay
       file: ./src/mappings/Maker/MCDVat.ts
@@ -249,8 +255,8 @@ dataSources:
           file: ./abis/Maker/MCDCat.json
       eventHandlers:
         - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
-          topic0: '0x29ae811400000000000000000000000000000000000000000000000000000000' # Anonymous event for `setDelay`
-          handler: handleLogNoteSetDelay
+          topic0: '0xebecb39d00000000000000000000000000000000000000000000000000000000' # Anonymous event for `flipFile`
+          handler: handleFlipFile
       file: ./src/mappings/Maker/MCDCat.ts
   - kind: ethereum/contract
     name: Maker_Flopper

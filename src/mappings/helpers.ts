@@ -1,5 +1,25 @@
-import { Address } from "@graphprotocol/graph-ts"
-import { Platform, Target, Timelock } from '../../generated/schema'
+import { Address, BigInt, ByteArray, Bytes } from "@graphprotocol/graph-ts"
+import { Param, Platform, Target, Timelock } from '../../generated/schema'
+
+/** Converts an event param value to an address string
+ * 
+ * @param hexString 32-byte string prepended with "0x"
+ * @returns 20-byte string prepended with "0x"
+ */
+export function convertHexStringToAddressString(hexString: string): string {
+    return hexString.slice(0, 3).concat(hexString.slice(27))
+}
+
+/** Converts an event param value to an BigInt string
+ * 
+ * @param hexString 32-byte string prepended with "0x"
+ * @returns BigInt-like string
+*/
+export function convertHexStringToBigIntString(hexString: string): string {
+    let bytes = ByteArray.fromHexString(hexString).reverse()
+    let int = BigInt.fromSignedBytes(bytes as Bytes)
+    return int.toString()
+}
 
 /** Creates a Platform
  * 
@@ -54,9 +74,28 @@ export function createTarget(address: Address, platform: string): void {
     }
 }
 
+/** Creates a Param
+ * 
+ * @param id Unique name
+ * @param description Human-readable description
+ * @param platform Platform ID
+ * @param target Target ID
+ * @param currentValue Current value (as a string)
+ */
+export function createParam(id: string, description: string, platform: string, target: string, currentValue: string): void {
+    let param = Param.load(id)
+    if (param === null) {
+        param = new Param(id)
+        param.description = description
+        param.platform = platform
+        param.target = target
+    }
+    param.currentValue = currentValue
+    param.save()
+}
+
 /** Returns human-readable name for Ethereum address
  * 
- * @dev TODO
  * @param address Target address
  * @returns Human-readable name (or input if no result found)
  */
