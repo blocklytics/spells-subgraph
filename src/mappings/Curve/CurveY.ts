@@ -2,6 +2,7 @@ import { log } from "@graphprotocol/graph-ts"
 import { CommitNewAdmin, NewAdmin, CommitNewParameters, NewParameters } from '../../../generated/Curve_CurveY/CurveY'
 import { Platform, Timelock, Spell } from '../../../generated/schema'
 import { PLATFORM, createAndReturnSpellForNewAdmin, createAndReturnSpellForNewParameters } from "./helpers"
+import { createParam } from "../helpers"
 
 /** Handles CurveY event CommitNewAdmin
  * 
@@ -68,15 +69,45 @@ export function handleCommitNewParameters(event: CommitNewParameters): void {
  */
 export function handleNewParameters(event: NewParameters): void {
     let id = PLATFORM + "-" + event.address.toHexString() + "-" + event.params.A.toString() + "-" + event.params.admin_fee.toString() + "-" + event.params.fee.toString()
-    let tx = Spell.load(id)
-    if (tx === null) {
+    let spell = Spell.load(id)
+    if (spell === null) {
         let debug_id = event.transaction.hash.toHexString()
         log.warning("CurveY Spell not found {}", [debug_id])
     } else {
-        tx.isExecuted = true
-        tx.executedAtTimestamp = event.block.timestamp
-        tx.executedAtTransaction = event.transaction.hash.toHexString()
-        tx.save()
+        spell.isExecuted = true
+        spell.executedAtTimestamp = event.block.timestamp
+        spell.executedAtTransaction = event.transaction.hash.toHexString()
+        spell.save()
     }
+
+    createParam(
+        PLATFORM + "-" + event.address.toHexString() + "-A",
+        "Amplification",
+        PLATFORM,
+        event.address.toHexString(),
+        event.params.A.toString()
+        // spell.id,
+        // event.block.timestamp
+    )
+
+    createParam(
+        PLATFORM + "-" + event.address.toHexString() + "-AdminFee",
+        "Admin fee",
+        PLATFORM,
+        event.address.toHexString(),
+        event.params.admin_fee.toString()
+        // spell.id,
+        // event.block.timestamp
+    )
+
+    createParam(
+        PLATFORM + "-" + event.address.toHexString() + "-Fee",
+        "Trading fee",
+        PLATFORM,
+        event.address.toHexString(),
+        event.params.fee.toString()
+        // spell.id,
+        // event.block.timestamp
+    )
 }
   
