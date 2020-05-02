@@ -131,11 +131,7 @@ dataSources:
         - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
           topic0: "0x29ae811400000000000000000000000000000000000000000000000000000000"
           handler: handleLogNoteSetDelay
-<<<<<<< HEAD
       file: Maker_MCDSpotter/Maker_MCDSpotter.wasm
-=======
-      file: Maker_MCDFlapper/Maker_MCDFlapper.wasm
->>>>>>> origin/master
   - kind: ethereum/contract
     name: Maker_MCDPot
     network: mainnet
@@ -159,7 +155,6 @@ dataSources:
       eventHandlers:
         - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
           topic0: "0x29ae811400000000000000000000000000000000000000000000000000000000"
-<<<<<<< HEAD
           handler: handleLogNoteFileForDsr
         - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
           topic0: "0xd4e8be8300000000000000000000000000000000000000000000000000000000"
@@ -167,9 +162,6 @@ dataSources:
         - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
           topic0: "0x6924500900000000000000000000000000000000000000000000000000000000"
           handler: handleLogNoteFileForCage
-=======
-          handler: handleLogNoteSetDelay
->>>>>>> origin/master
       file: Maker_MCDPot/Maker_MCDPot.wasm
   - kind: ethereum/contract
     name: Maker_MCDJug
@@ -177,11 +169,7 @@ dataSources:
     source:
       address: "0x19c0976f590D67707E62397C87829d896Dc0f1F1"
       abi: MCDJug
-<<<<<<< HEAD
       startBlock: 8928160
-=======
-      startBlock: 8928152
->>>>>>> origin/master
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -205,11 +193,7 @@ dataSources:
     network: mainnet
     source:
       address: "0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B"
-<<<<<<< HEAD
       abi: MCDVat
-=======
-      abi: MCDJug
->>>>>>> origin/master
       startBlock: 8928152
     mapping:
       kind: ethereum/events
@@ -222,7 +206,6 @@ dataSources:
         - Target
         - Param
       abis:
-<<<<<<< HEAD
         - name: MCDVat
           file: Maker_MCDVat/abis/Maker/MCDVat.json
       eventHandlers:
@@ -300,19 +283,11 @@ dataSources:
       abis:
         - name: Flopper
           file: Maker_Flopper/abis/Maker/Flopper.json
-=======
-        - name: MCDJug
-          file: Maker_MCDVat/abis/Maker/MCDJug.json
->>>>>>> origin/master
       eventHandlers:
         - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,bytes)
           topic0: "0x29ae811400000000000000000000000000000000000000000000000000000000"
           handler: handleLogNoteSetDelay
-<<<<<<< HEAD
       file: Maker_Flopper/Maker_Flopper.wasm
-=======
-      file: Maker_MCDJug/Maker_MCDJug.wasm
->>>>>>> origin/master
   - kind: ethereum/contract
     name: Compound_Timelock
     network: mainnet
@@ -336,7 +311,8 @@ dataSources:
       eventHandlers:
         - event: CancelTransaction(indexed bytes32,indexed address,uint256,string,bytes,uint256)
           handler: handleCancelTransaction
-        - event: ExecuteTransaction(indexed bytes32,indexed address,uint256,string,bytes,uint256)
+        - event: ExecuteTransaction(indexed bytes32,indexed
+            address,uint256,string,bytes,uint256)
           handler: handleExecuteTransaction
         - event: NewAdmin(indexed address)
           handler: handleNewAdmin
@@ -485,6 +461,66 @@ dataSources:
       abis:
         - name: CurveY
           file: Curve_CurveB/abis/Curve/CurveY.json
+      eventHandlers:
+        - event: CommitNewAdmin(indexed uint256,indexed address)
+          handler: handleCommitNewAdmin
+        - event: NewAdmin(indexed address)
+          handler: handleNewAdmin
+        - event: CommitNewParameters(indexed uint256,uint256,uint256,uint256)
+          handler: handleCommitNewParameters
+        - event: NewParameters(uint256,uint256,uint256)
+          handler: handleNewParameters
+      file: Curve_CurveY/Curve_CurveY.wasm
+  - kind: ethereum/contract
+    name: Curve_CurveS_v2
+    network: mainnet
+    source:
+      address: "0xa5407eae9ba41422680e2e00537571bcc53efbfd"
+      abi: CurveY
+      startBlock: 9906598
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Timelock
+        - Spell
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: CurveY
+          file: Curve_CurveS_v2/abis/Curve/CurveY.json
+      eventHandlers:
+        - event: CommitNewAdmin(indexed uint256,indexed address)
+          handler: handleCommitNewAdmin
+        - event: NewAdmin(indexed address)
+          handler: handleNewAdmin
+        - event: CommitNewParameters(indexed uint256,uint256,uint256,uint256)
+          handler: handleCommitNewParameters
+        - event: NewParameters(uint256,uint256,uint256)
+          handler: handleNewParameters
+      file: Curve_CurveY/Curve_CurveY.wasm
+  - kind: ethereum/contract
+    name: Curve_CurveC
+    network: mainnet
+    source:
+      address: "0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56"
+      abi: CurveY
+      startBlock: 9554040
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Timelock
+        - Spell
+        - Platform
+        - Target
+        - Param
+      abis:
+        - name: CurveY
+          file: Curve_CurveC/abis/Curve/CurveY.json
       eventHandlers:
         - event: CommitNewAdmin(indexed uint256,indexed address)
           handler: handleCommitNewAdmin
